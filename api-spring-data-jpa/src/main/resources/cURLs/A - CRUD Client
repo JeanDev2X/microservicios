@@ -1,0 +1,18 @@
+# Listar clientes
+curl http://localhost:8080/api/clients
+
+# Crear cliente
+curl -X POST http://localhost:8080/api/clients \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Pedro","email":"pedro@example.com"}'
+
+# Obtener por id
+curl http://localhost:8080/api/clients/1
+
+# Actualizar
+curl -X PUT http://localhost:8080/api/clients/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ana T.","email":"ana@example.com"}'
+
+# Eliminar
+curl -X DELETE http://localhost:8080/api/clients/3

@@ -1,0 +1,8 @@
+# Clientes con más de N órdenes (JPQL)
+curl "http://localhost:8080/api/clients/with-more-than?orders=0"
+
+# Órdenes entre fechas
+curl "http://localhost:8080/api/orders/between?start=2024-01-01T00:00:00&end=2030-01-01T00:00:00"
+
+# Conteo nativo por status
+curl "http://localhost:8080/api/orders/count-native?status=PENDING"

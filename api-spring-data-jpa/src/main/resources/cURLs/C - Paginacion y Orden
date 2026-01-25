@@ -1,0 +1,5 @@
+# Clientes paginados y ordenados por name asc
+curl "http://localhost:8080/api/clients/page?page=0&size=5&sort=name,asc"
+
+# Ordenes paginadas
+curl "http://localhost:8080/api/orders?page=0&size=5"

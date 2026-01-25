@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/mitocode21/mscloud-instructor.git
+          search-paths: infra/config-server-properties
+          clone-on-start: true
+          default-label: main
+          username: agonzalesr93
+          #Para generar el token ir a https://github.com/settings/tokens
+          password: 
+          force-pull: true

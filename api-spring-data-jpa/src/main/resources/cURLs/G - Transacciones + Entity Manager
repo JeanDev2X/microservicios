@@ -1,0 +1,8 @@
+# Batch insert de productos (ejemplo)
+curl -X POST "http://localhost:8080/api/orders/products/batch?batchSize=2" \
+  -H "Content-Type: application/json" \
+  -d '[
+        {"name":"Silla","price":120.0},
+        {"name":"Escritorio","price":450.0},
+        {"name":"Laptop","price":3200.0}
+      ]'

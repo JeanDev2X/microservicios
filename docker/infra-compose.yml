@@ -1,0 +1,278 @@
+#Instalar docker y docker-compose
+#Crear network
+#docker network create ms-network-curso
+#Levantar servicios core con el siguiente comando, solo si estamos en la raiz del proyecto:
+# docker-compose --file docker/infra-compose.yml --profile core up
+
+#Levantar servicios si estoy dentro de la carpeta docker
+# docker-compose --profile core --file infra-compose.yml up
+
+#Depende la version de docker-compose que tengas instalado, puede que necesites usar "docker compose" en lugar de "docker-compose"
+
+services:
+
+  postgres-order-v1:
+    profiles: ["core"]
+    image: postgres:15
+    container_name: postgres-order-v1
+    restart: always
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: orderuser
+      POSTGRES_PASSWORD: orderpass
+    ports:
+      - "51010:5432"
+    volumes:
+      - api-order-service-v1-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  postgres-payment-v1:
+    profiles: ["core"]
+    image: postgres:15
+    container_name: postgres-payment-v1
+    restart: always
+    environment:
+      POSTGRES_DB: paymentdb
+      POSTGRES_USER: paymentuser
+      POSTGRES_PASSWORD: paymentpass
+    ports:
+      - "51020:5432"
+    volumes:
+      - api-payment-service-v1-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  postgres-payment-v2:
+    profiles: ["core"]
+    image: postgres:15
+    container_name: postgres-payment-v2
+    restart: always
+    environment:
+      POSTGRES_DB: paymentv2db
+      POSTGRES_USER: paymentv2user
+      POSTGRES_PASSWORD: paymentv2pass
+    ports:
+      - "51030:5432"
+    volumes:
+      - api-payment-service-v2-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  postgres-restaurant-v1:
+    profiles: ["core"]
+    image: postgres:15
+    container_name: postgres-restaurant-v1
+    restart: always
+    environment:
+      POSTGRES_DB: restaurantdb
+      POSTGRES_USER: restaurantuser
+      POSTGRES_PASSWORD: restaurantpass
+    ports:
+      - "51040:5432"
+    volumes:
+      - api-restaurant-service-v1-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  postgres-delivery-v1:
+    profiles: ["core"]
+    image: postgres:15
+    container_name: postgres-delivery-v1
+    restart: always
+    environment:
+      POSTGRES_DB: deliverydb
+      POSTGRES_USER: deliveryuser
+      POSTGRES_PASSWORD: deliverypass
+    ports:
+      - "51060:5432"
+    volumes:
+      - api-delivery-service-v1-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  postgres-auth-v1:
+    profiles: ["down"]
+    image: postgres:15
+    container_name: auth-delivery-v1
+    restart: always
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: authpass
+    ports:
+      - "51300:5432"
+    volumes:
+      - api-auth-service-v1-db-data:/var/lib/postgresql/data
+    networks:
+      - ms-network-curso
+
+  api-visa-service-v1:
+    profiles: ["core"]
+    build:
+      context: ../api-visa-service-v1
+      dockerfile: Dockerfile
+    container_name: api-visa-service-v1
+    ports:
+      - "52010:52010"
+    networks:
+      - ms-network-curso
+
+  api-config-server-v1:
+    profiles: ["down"]
+    build:
+      context: ../api-config-server-v1
+      dockerfile: Dockerfile
+    container_name: api-config-server-v1
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=config-server
+    networks:
+      - ms-network-curso
+
+  api-eureka-server-v1:
+    profiles: ["down"]
+    build:
+      context: ../api-eureka-server-v1
+      dockerfile: Dockerfile
+    container_name: api-eureka-server-v1
+    ports:
+      - "8761:8761"
+    networks:
+      - ms-network-curso
+
+  zookeeper:
+    profiles: ["down"]
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - ms-network-curso
+
+  kafka:
+    profiles: ["down"]
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: CLIENT://:9092,EXTERNAL://:9093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: CLIENT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    networks:
+      - ms-network-curso
+
+  mongodb_order_read:
+    profiles: ["core"]
+    image: mongo:7.0  # puedes usar otra versión si quieres
+    container_name: mongodb_order_read
+    ports:
+      - "51070:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_DATABASE: order_read
+    volumes:
+      - mongo_order_read_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - ms-network-curso
+
+  prometheus:
+    profiles: ["down"]
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - ms-network-curso
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  grafana:
+    profiles: ["down"]
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - ms-network-curso
+
+  jaeger:
+    profiles: ["down"]
+    image: jaegertracing/all-in-one:1.53
+    container_name: jaeger
+    ports:
+      - "16686:16686"  # UI Web
+      - "6831:6831/udp" # UDP para recibir trazas
+      - "4318:4318"
+      - "4317:4317"
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    networks:
+      - ms-network-curso
+
+  keycloak:
+    profiles: ["down"]
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "52020:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    restart: unless-stopped
+    networks:
+      - ms-network-curso
+
+  portainer:
+    profiles: ["core"]
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - ms-network-curso
+
+
+volumes:
+  api-order-service-v1-db-data:
+  api-payment-service-v1-db-data:
+  api-restaurant-service-v1-db-data:
+  api-delivery-service-v1-db-data:
+  api-auth-service-v1-db-data:
+  api-payment-service-v2-db-data:
+  mongo_order_read_data:
+  kafka-data:
+  prometheus_data:
+  grafana_data:
+  keycloak_data:
+  portainer_data:
+
+#crear el network de forma manual
+#docker network create ms-network-curso
+networks:
+  ms-network-curso:
+    external: true

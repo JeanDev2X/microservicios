@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: api-order-query-service-v1
+  mongodb:
+    uri: mongodb://order_read_user:order_read_pass@localhost:51070/order_read
+    database: order_read
+
+server:
+  port: 50070
+  servlet:
+    context-path: /api/v1
+#
+#spring:
+#  data:
+#    mongodb:
+#      uri: mongodb://order_read_user:order_read_pass@localhost:51070/order_read
+#      database: order_read

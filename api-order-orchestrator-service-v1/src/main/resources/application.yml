@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: api-order-orchestrator-service-v1  # nombre de tu servicio, usado para buscar properties
+
+
+server:
+  port: 50100
+  servlet:
+    context-path: /api/v1/order-orchestrator
+
+
+http-clients:
+  internal:
+    api-order-service-v1:
+      base-url: http://localhost:50010/api/v1/orders
+      timeout: 5s
+    api-payment-service-v1:
+      base-url: http://localhost:50020/api/v1/payments
+      timeout: 5s
+    api-restaurant-service-v1:
+      base-url: http://localhost:50030/api/v1/restaurants
+      timeout: 5s
+    api-delivery-service-v1:
+      base-url: http://localhost:50040/api/v1/delivery
+      timeout: 5s
+  external:
+    visa:
+      base-url: http://localhost:5566/api/visa
+      timeout: 5s
+
+#logging:
+#  level:
+#    com:.mitocode.orchestrator.client.payments: DEBUG
+#    feign.Logger: DEBUG

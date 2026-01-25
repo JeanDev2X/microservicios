@@ -1,0 +1,11 @@
+# Crear una orden con items
+curl -X POST http://localhost:8080/api/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+        "clientId": 1,
+        "status": "PENDING",
+        "items": [
+          {"productId": 1, "quantity": 2},
+          {"productId": 2, "quantity": 1}
+        ]
+      }'

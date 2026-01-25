@@ -1,0 +1,53 @@
+##############################
+# Build / Binaries
+##############################
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+##############################
+# IDE / Tools
+##############################
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VSCode
+.vscode/
+
+##############################
+# Maven / Gradle
+##############################
+# Excluir tu Maven local
+/apache-maven-3.9.11/
+
+# Wrapper files (si existen)
+#.mvn/
+#**/.mvn/
+#.mvnw
+#.mvnw.cmd
+
+##############################
+# OS Files
+##############################
+.DS_Store
+Thumbs.db
+
+##############################
+# Archives
+##############################
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+

@@ -1,0 +1,20 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/demo_db
+    username: demo_user
+    password: demo_pass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update #Actualiza el esquema para que coincida con tus entidades, creando tablas y columnas nuevas si faltan, pero no borra nada.
+      #ddl-auto: create #Borra todo el esquema existente y lo crea de nuevo al iniciar la app.
+      #ddl-auto: none #No hace nada. Hibernate no tocar� la base de datos.
+      #ddl-auto: validate #Solo valida si el esquema existente coincide con tus entidades. Si hay diferencias, lanza error.
+      #ddl-auto: create-drop #Igual que create, pero tambi�n borra las tablas cuando se detiene la app.
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true

@@ -1,0 +1,8 @@
+# Buscar por nombre (contains, ignore case)
+curl "http://localhost:8080/api/clients/search?name=an"
+
+# Contar por email
+curl "http://localhost:8080/api/clients/countByEmail?email=ana@example.com"
+
+# Órdenes por status
+curl "http://localhost:8080/api/orders/status/PENDING"
