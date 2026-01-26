@@ -1,4 +1,4 @@
 package com.mitocode.order.dto.request;
 
-public record RestaurantRequest() {
+public record RestaurantRequest(Long id, String name) {
 }
