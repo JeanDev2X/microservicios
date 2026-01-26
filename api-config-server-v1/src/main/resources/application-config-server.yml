@@ -9,5 +9,5 @@ spring:
           default-label: main
           username: agonzalesr93
           #Para generar el token ir a https://github.com/settings/tokens
-          password: 
+          password:
           force-pull: true
