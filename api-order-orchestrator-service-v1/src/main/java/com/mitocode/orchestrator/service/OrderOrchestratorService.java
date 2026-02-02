@@ -1,5 +1,6 @@
 package com.mitocode.orchestrator.service;
 
+import com.mitocode.orchestrator.client.ordes.dto.CreateOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
 import lombok.AllArgsConstructor;
@@ -10,12 +11,14 @@ import org.springframework.stereotype.Service;
 public class OrderOrchestratorService {
 
     private final OrderService orderService;
-    private final PaymentService paymentService;
+    /*private final PaymentService paymentService;
     private final RestaurantService restaurantService;
-    private final DeliveryService deliveryService;
+    private final DeliveryService deliveryService;*/
 
     public CreateOrderOrchestratorResponse createOrder(CreateOrderOrchestratorRequest request) {
-        return null;
+
+        CreateOrderResponse orderCreated = orderService.createOrder(request);
+        return new CreateOrderOrchestratorResponse(orderCreated.id());
     }
 
 }
