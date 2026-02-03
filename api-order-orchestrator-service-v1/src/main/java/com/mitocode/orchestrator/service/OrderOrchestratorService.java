@@ -11,13 +11,17 @@ import org.springframework.stereotype.Service;
 public class OrderOrchestratorService {
 
     private final OrderService orderService;
-    /*private final PaymentService paymentService;
-    private final RestaurantService restaurantService;
+    private final PaymentService paymentService;
+    /*private final RestaurantService restaurantService;
     private final DeliveryService deliveryService;*/
 
     public CreateOrderOrchestratorResponse createOrder(CreateOrderOrchestratorRequest request) {
 
         CreateOrderResponse orderCreated = orderService.createOrder(request);
+
+        paymentService.checkBalance(request.customer().id(), request.card().id(), request.total());
+        paymentService.charge(request.customer().id(), request.card().id(), request.total());
+
         return new CreateOrderOrchestratorResponse(orderCreated.id());
     }
 
