@@ -1,21 +1,27 @@
-package com.mitocode.orchestrator.client.ordes;
+package com.mitocode.orchestrator.client.ordes.restclient;
 
-import com.mitocode.orchestrator.client.ordes.dto.CreateOrderRequest;
-import com.mitocode.orchestrator.client.ordes.dto.CreateOrderResponse;
-import com.mitocode.orchestrator.client.ordes.dto.CustomerRequest;
-import com.mitocode.orchestrator.client.ordes.dto.RestaurantRequest;
+import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderRequest;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.CustomerRequest;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.RestaurantRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+@Slf4j
 @Component
 @AllArgsConstructor
-public class OrderServiceV1Client {
+@Profile("RestClient")
+public class OrderServiceV1RestClient implements OrderServiceV1Client {
 
     private final RestClient orderRestClient;
 
     public CreateOrderResponse createOrder(CreateOrderOrchestratorRequest createOrderOrchestratorRequest) {
+        log.info("RestClient - Creating order for customer: {}", createOrderOrchestratorRequest.customer().name());
         CreateOrderRequest request = new CreateOrderRequest(
                 new CustomerRequest(createOrderOrchestratorRequest.customer().id(), createOrderOrchestratorRequest.customer().name()),
                 new RestaurantRequest(createOrderOrchestratorRequest.restaurant().id(), createOrderOrchestratorRequest.restaurant().name()),

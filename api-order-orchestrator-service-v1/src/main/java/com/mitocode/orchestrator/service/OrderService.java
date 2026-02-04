@@ -1,7 +1,7 @@
 package com.mitocode.orchestrator.service;
 
 import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
-import com.mitocode.orchestrator.client.ordes.dto.CreateOrderResponse;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class OrderService {
 
-    private final OrderServiceV1Client orderRestClient;
+    private final OrderServiceV1Client orderServiceV1Client;
 
     public CreateOrderResponse createOrder(CreateOrderOrchestratorRequest orchestratorRequest) {
-        return orderRestClient.createOrder(orchestratorRequest);
+        log.info("Creating order through Order Service V1 Client");
+        return orderServiceV1Client.createOrder(orchestratorRequest);
     }
 
 }
