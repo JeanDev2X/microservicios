@@ -1,6 +1,6 @@
 package com.mitocode.orchestrator.service;
 
-import com.mitocode.orchestrator.client.ordes.dto.CreateOrderResponse;
+import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
 import lombok.AllArgsConstructor;
