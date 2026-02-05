@@ -119,7 +119,7 @@ services:
       - ms-network-curso
 
   api-config-server-v1:
-    profiles: ["down"]
+    profiles: ["core"]
     build:
       context: ../api-config-server-v1
       dockerfile: Dockerfile

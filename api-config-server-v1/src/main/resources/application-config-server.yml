@@ -3,11 +3,11 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/mitocode21/mscloud-instructor.git
+          uri: https://github.com/JeanDev2X/microservicios.git
           search-paths: infra/config-server-properties
           clone-on-start: true
           default-label: main
-          username: agonzalesr93
+          username: JeanDev2X
           #Para generar el token ir a https://github.com/settings/tokens
-          password:
+          password: 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
           force-pull: true
