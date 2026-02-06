@@ -4,7 +4,7 @@
 #Levantar servicios core con el siguiente comando, solo si estamos en la raiz del proyecto:
 # docker-compose --file docker/infra-compose.yml --profile core up
 
-#Levantar servicios si estoy dentro de la carpeta docker
+#Levantar servicios si estoy dentro de la cardpeta docker
 # docker-compose --profile core --file infra-compose.yml up
 
 #Depende la version de docker-compose que tengas instalado, puede que necesites usar "docker compose" en lugar de "docker-compose"
