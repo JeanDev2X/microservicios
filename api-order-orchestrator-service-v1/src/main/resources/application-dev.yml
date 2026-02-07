@@ -1,4 +1,4 @@
 spring:
-  application:
-    name: api-order-orchestrator-service-v1  # nombre de tu servicio, usado para buscar properties
+  config:
+    import: "optional:configserver:http://localhost:8888"  # o sin 'optional:' si quieres que falle si no hay server
 
