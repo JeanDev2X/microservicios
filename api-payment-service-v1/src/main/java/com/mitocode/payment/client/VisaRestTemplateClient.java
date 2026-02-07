@@ -5,8 +5,8 @@ import com.mitocode.payment.client.dto.ChargeResponse;
 import com.mitocode.payment.client.dto.CheckBalanceRequest;
 import com.mitocode.payment.client.dto.CheckBalanceResponse;
 import com.mitocode.payment.error.ChargeErrorException;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -21,13 +21,22 @@ import java.math.BigDecimal;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class VisaRestTemplateClient {
 
-    private static final String baseUrl = "http://localhost:52010/api/visa/";
-
+    //private static final String baseUrl = "http://localhost:52010/api/visa/";
+    private final String baseUrl;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+
+    public VisaRestTemplateClient(
+            //http://localhost:52010/api/visa"
+            @Value("${http-clients.external.visa.base-url}") String baseUrl,
+                                  RestTemplate restTemplate,
+                                  ObjectMapper objectMapper) {
+        this.baseUrl = baseUrl;
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     public CheckBalanceResponse checkBalance(Long cardId, BigDecimal requiredAmount) {
         //creando el body de la peticion HTTP
