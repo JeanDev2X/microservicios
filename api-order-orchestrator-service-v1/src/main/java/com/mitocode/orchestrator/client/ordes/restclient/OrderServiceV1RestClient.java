@@ -29,7 +29,7 @@ public class OrderServiceV1RestClient implements OrderServiceV1Client {
 
         //return orderRestClient.post().uri("/orders") ya no se usa el .uri porque se configura en el bean RestClient desde config server
 
-        return orderRestClient.post().uri("/orders")
+        return orderRestClient.post()
                 .body(request)
                 .retrieve()
                 .body(CreateOrderResponse.class);
