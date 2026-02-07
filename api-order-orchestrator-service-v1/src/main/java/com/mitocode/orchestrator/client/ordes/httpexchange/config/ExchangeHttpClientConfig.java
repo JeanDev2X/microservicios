@@ -1,6 +1,7 @@
 package com.mitocode.orchestrator.client.ordes.httpexchange.config;
 
 import com.mitocode.orchestrator.client.ordes.httpexchange.OrderServiceV1HttpExchangeClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
@@ -11,10 +12,13 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class ExchangeHttpClientConfig {
 
     @Bean
-    public RestClient orderServiceV1HttpExchangeRestClient(RestClient.Builder restClientBuilder){
+    public RestClient orderServiceV1HttpExchangeRestClient(
+            @Value("${http-clients.internal.api-order-service-v1.base-url}")
+            String baseUrl,
+            RestClient.Builder restClientBuilder){
         return restClientBuilder
                 .clone()
-                .baseUrl("http://localhost:50010/api")
+                .baseUrl(baseUrl)
                 .build();
     }
 
