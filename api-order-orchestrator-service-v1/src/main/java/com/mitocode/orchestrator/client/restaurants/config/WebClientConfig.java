@@ -14,11 +14,13 @@ public class WebClientConfig {
     }
 
     @Bean
-    public WebClient restaurantWebClient(WebClient.Builder webClientBuilder) {
+    public WebClient restaurantWebClient(
+            @Value("${http-clients.internal.api-restaurant-service-v1.base-url}")
+            String baseUrl,
+            WebClient.Builder webClientBuilder) {
         return webClientBuilder
                 .clone()
-                .baseUrl("http://localhost:50040/api/v1/restaurants")
+                .baseUrl(baseUrl)
                 .build();
     }
-
 }
