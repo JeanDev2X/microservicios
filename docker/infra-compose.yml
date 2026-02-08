@@ -132,7 +132,7 @@ services:
       - ms-network-curso
 
   api-eureka-server-v1:
-    profiles: ["down"]
+    profiles: ["core"]
     build:
       context: ../api-eureka-server-v1
       dockerfile: Dockerfile
