@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "paymentServiceV1FeignClient", url = "${http-clients.internal.api-payment-service-v1.base-url}")
+@FeignClient(name = "api-payment-service-v1")
 public interface PaymentServiceV1FeignClient {
 
-    @PostMapping("/check-balance")
+    @PostMapping("/api/v1/payments/check-balance")
     ResponseEntity<Void> checkBalance(@RequestBody CheckBalanceRequest request);
 
-    @PostMapping("/charge")
+    @PostMapping("/api/v1/payments/charge")
     ResponseEntity<Void> charge(@RequestBody ChargeRequest request);
 
 }
