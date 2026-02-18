@@ -21,5 +21,5 @@ public class OrderRestClientConfig {
         String baseUrl = "http://API-ORDER-SERVICE-V1";
         return restClientBuilder.clone().baseUrl(baseUrl).build();
     }
-
+//30
 }
