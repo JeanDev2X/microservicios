@@ -13,13 +13,22 @@ public class OrderRestClientConfig {
         return RestClient.builder();
     }*/
 
+//    @Bean
+//    public RestClient orderRestClient(
+//            //@Value("${http-clients.internal.api-order-service-v1.base-url}")
+//            //String baseUrl,
+//            RestClient.Builder restClientBuilder){
+//        String baseUrl = "http://API-ORDER-SERVICE-V1";
+//        return restClientBuilder.clone().baseUrl(baseUrl).build();
+//    }
+//30
+
     @Bean
     public RestClient orderRestClient(
-            //@Value("${http-clients.internal.api-order-service-v1.base-url}")
-            //String baseUrl,
+            @Value("${http-clients.internal.api-order-service-v1.base-url}")
+            String baseUrl,
             RestClient.Builder restClientBuilder){
-        String baseUrl = "http://API-ORDER-SERVICE-V1";
         return restClientBuilder.clone().baseUrl(baseUrl).build();
     }
-//30
+
 }
