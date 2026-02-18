@@ -1,7 +1,8 @@
 spring:
   application:
     name: api-order-orchestrator-service-v1  # nombre de tu servicio, usado para buscar properties
-
+  profiles:
+    active: dev  # Esto le dice a Spring que busque application-dev.yml
 
 #server:
 #  port: 50100
