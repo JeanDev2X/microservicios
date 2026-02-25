@@ -2,7 +2,7 @@
 http-clients:
   internal:
     api-order-service-v1:
-      base-url: http://api/v1/order-orchestrator/api/v1/orders
+      base-url: http://api-order-service-v1/api/v1/orders
       timeout: 5s
     api-payment-service-v1:
       base-url: http://api-payment-service-v1/api/v1/payments
