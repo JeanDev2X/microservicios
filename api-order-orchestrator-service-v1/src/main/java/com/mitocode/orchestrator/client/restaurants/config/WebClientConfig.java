@@ -15,15 +15,27 @@ public class WebClientConfig {
         return WebClient.builder();
     }
 
+//    @Bean
+//    public WebClient restaurantWebClient(
+//            //@Value("${http-clients.internal.api-restaurant-service-v1.base-url}")
+//            //String baseUrl,
+//            WebClient.Builder webClientBuilder) {
+//        String baseUrl = "http://api-restaurant-service-v1";
+//        return webClientBuilder
+//                .clone()
+//                .baseUrl(baseUrl)
+//                .build();
+//    }
+
     @Bean
     public WebClient restaurantWebClient(
-            //@Value("${http-clients.internal.api-restaurant-service-v1.base-url}")
-            //String baseUrl,
+            @Value("${http-clients.internal.api-restaurant-service-v1.base-url}")
+            String baseUrl,
             WebClient.Builder webClientBuilder) {
-        String baseUrl = "http://api-restaurant-service-v1";
         return webClientBuilder
                 .clone()
                 .baseUrl(baseUrl)
                 .build();
     }
+
 }
