@@ -8,13 +8,13 @@ http-clients:
       base-url: http://api-payment-service-v1/api/v1/payments
       timeout: 5s
     api-payment-service-v2:
-      base-url: http://api-payment-service-v2/api/v1/payments
+      base-url: http://api-payment-service-v2/api/v2/payments
       timeout: 5s
     api-restaurant-service-v1:
       base-url: http://api-restaurant-service-v1/api/v1/restaurants
       timeout: 5s
     api-restaurant-service-v2:
-      base-url: http://api-restaurant-service-v2/api/v1/restaurants
+      base-url: http://api-restaurant-service-v2/api/v2/restaurants
       timeout: 5s
     api-delivery-service-v1:
       base-url: http://api-delivery-service-v1/api/v1/delivery
