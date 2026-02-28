@@ -21,6 +21,7 @@ public class OrderRestClientBaseConfig {
 
     //usamos @Primary para indicar que este es el bean principal a usar cuando se inyecte un RestClient.Builder sin especificar el nombre del bean,
     // esto es necesario porque tenemos otro RestClient.Builder definido en esta clase con el nombre "loadBalancedRestClientBuilder"
+    //Para que esta la que inyecte por defecto en el cliente Eureka.
     @Primary
     @Bean
     public RestClient.Builder cleanRestClientBuilder() {
