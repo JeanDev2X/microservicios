@@ -6,6 +6,8 @@
 spring:
   application:
     name: api-payment-service-v2
+  profiles:
+    active: dev  # Esto le dice a Spring que busque application-dev.yml
 #  datasource:
 #    url: jdbc:postgresql://localhost:51030/paymentdb
 #    username: paymentuser
