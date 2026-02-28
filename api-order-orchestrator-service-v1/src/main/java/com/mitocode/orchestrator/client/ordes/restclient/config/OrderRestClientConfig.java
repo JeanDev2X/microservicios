@@ -36,7 +36,7 @@ public class OrderRestClientConfig {
     public RestClient orderRestClient(
             @Value("${http-clients.internal.api-order-service-v1.base-url}")
             String baseUrl,
-            @Qualifier("loadBalancedRestClientBuilder")
+            @Qualifier("loadBalancedRestClientBuilder")//Indicamo que use el cliente con loadBalanced para resuelva por los nombres de servicio de Eureka
             RestClient.Builder restClientBuilder){
         return restClientBuilder.clone().baseUrl(baseUrl).build();
     }

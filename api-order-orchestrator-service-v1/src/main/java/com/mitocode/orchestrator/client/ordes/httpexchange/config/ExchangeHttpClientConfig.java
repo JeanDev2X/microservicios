@@ -1,6 +1,7 @@
 package com.mitocode.orchestrator.client.ordes.httpexchange.config;
 
 import com.mitocode.orchestrator.client.ordes.httpexchange.OrderServiceV1HttpExchangeClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ public class ExchangeHttpClientConfig {
     public RestClient orderServiceV1HttpExchangeRestClient(
             @Value("${http-clients.internal.api-order-service-v1.base-url}")
             String baseUrl,
+            @Qualifier("loadBalancedRestClientBuilder")
             RestClient.Builder restClientBuilder){
         return restClientBuilder
                 .clone()
