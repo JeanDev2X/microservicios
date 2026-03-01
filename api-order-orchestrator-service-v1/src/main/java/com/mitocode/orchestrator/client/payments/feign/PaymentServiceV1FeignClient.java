@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.payments;
+package com.mitocode.orchestrator.client.payments.feign;
 
 import com.mitocode.orchestrator.client.payments.dto.ChargeRequest;
 import com.mitocode.orchestrator.client.payments.dto.CheckBalanceRequest;

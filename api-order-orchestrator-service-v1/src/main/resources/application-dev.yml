@@ -8,5 +8,15 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
-  instance:
-    prefer-ip-address: true
+#  instance:
+#    prefer-ip-address: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      chargePaymentV2CB:      # Nombre del CircuitBreaker, debe coincidir con el usado en @CircuitBreaker(name="chargeService")
+        slidingWindowSize: 10               # Número de llamadas consideradas en la "ventana deslizante" para calcular el estado (CLOSED/HALF-OPEN/OPEN)
+        failureRateThreshold: 50            # Porcentaje de fallos (0-100) para abrir el circuito. Ej: 50 significa que si 50% de llamadas fallan, se abre
+        waitDurationInOpenState: 10s         # Tiempo que el circuito permanece abierto antes de pasar a HALF-OPEN para probar si el servicio ya se recuperó
+        permittedNumberOfCallsInHalfOpenState: 3   # Cantidad de llamadas permitidas cuando está en HALF-OPEN para evaluar si el servicio funciona de nuevo
+        minimumNumberOfCalls: 5             # Mínimo de llamadas necesarias antes de evaluar si debe abrirse el circuito (para evitar decisiones con pocos datos)
