@@ -19,4 +19,9 @@ public class OrderService {
         return orderServiceV1Client.createOrder(orchestratorRequest);
     }
 
+    public void completeOrder(String orderId) {
+        log.info("Completing order through Order Service V1 Client");
+        orderServiceV1Client.updateOrderStatus(orderId, "COMPLETED");
+    }
+
 }

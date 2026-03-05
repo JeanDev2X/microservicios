@@ -50,9 +50,11 @@ public class PaymentService {
     }
 
     //realizar el cargo
+    //El fallback method tiene que tener la misma firma del metodo anotado con @CircuitBreaker + un parametro adicional de tipo Throwable
     public void chargeFallback(Long customerId, Long cardId, BigDecimal amount,Throwable ex) {
         log.info("Calling Fallback PaymentServiceV1#charge");
         // Simula un insert a la base de datos
+        //validacion si ya se hizo el insert del metodo de arriba no hacer nada
         ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceV1RestClient.charge(request);
 

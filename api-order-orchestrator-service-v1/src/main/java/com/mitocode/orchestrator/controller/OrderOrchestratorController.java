@@ -2,14 +2,15 @@ package com.mitocode.orchestrator.controller;
 
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
+import com.mitocode.orchestrator.service.DeliveryService;
 import com.mitocode.orchestrator.service.OrderOrchestratorService;
+import com.mitocode.orchestrator.service.OrderService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderOrchestratorController {
 
     private final OrderOrchestratorService service;
+    private final DeliveryService deliveryService;
+    private final OrderService orderService;
 
     @PostMapping
     public ResponseEntity<CreateOrderOrchestratorResponse> createOrder(@RequestBody CreateOrderOrchestratorRequest request) {
@@ -24,6 +27,23 @@ public class OrderOrchestratorController {
         CreateOrderOrchestratorResponse createOrderResponse = service.createOrder(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
+    }
+
+    @PostMapping("/{orderId}/delivery/start")
+    public ResponseEntity<Void> startDelivery(@PathVariable UUID orderId) {
+
+        deliveryService.startDelivery(orderId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{orderId}/delivery/complete")
+    public ResponseEntity<Void> completeDelivery(@PathVariable UUID orderId) {
+
+        deliveryService.completeDelivery(orderId);
+        orderService.completeOrder(orderId.toString());
+
+        return ResponseEntity.ok().build();
     }
 
 }

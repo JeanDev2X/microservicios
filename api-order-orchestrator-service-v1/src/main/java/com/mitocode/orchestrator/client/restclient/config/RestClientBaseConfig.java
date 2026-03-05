@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.ordes.config;
+package com.mitocode.orchestrator.client.restclient.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-public class OrderRestClientBaseConfig {
+public class RestClientBaseConfig {
 
     //usamos @LoadBalanced para indicar que este RestClient.Builder debe ser configurado para usar load balancing,
     // lo que permite resolver el nombre del servicio a través de un balanceador de carga (como Ribbon o Spring Cloud LoadBalancer)

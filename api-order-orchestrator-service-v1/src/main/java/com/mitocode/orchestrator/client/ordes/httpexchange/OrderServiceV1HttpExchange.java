@@ -38,4 +38,14 @@ public class OrderServiceV1HttpExchange implements OrderServiceV1Client {
         return orderClient.create(request);
 
     }
+
+    @Override
+    public void cancelOrder(String orderId, String reason) {
+
+    }
+
+    @Override
+    public void updateOrderStatus(String orderId, String status) {
+
+    }
 }

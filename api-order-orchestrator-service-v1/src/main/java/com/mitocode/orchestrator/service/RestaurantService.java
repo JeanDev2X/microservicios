@@ -1,6 +1,6 @@
 package com.mitocode.orchestrator.service;
 
-import com.mitocode.orchestrator.client.restaurants.RestaurantServiceV1WebClient;
+import com.mitocode.orchestrator.client.restaurants.webclient.RestaurantServiceV1WebClient;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

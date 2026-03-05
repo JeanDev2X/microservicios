@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.restaurants.config;
+package com.mitocode.orchestrator.client.restaurants.webclient.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
