@@ -1,0 +1,973 @@
+diff --git a/api-delivery-service-v1/pom.xml b/api-delivery-service-v1/pom.xml
+index f1d4646..5a7fe60 100644
+--- a/api-delivery-service-v1/pom.xml
++++ b/api-delivery-service-v1/pom.xml
+@@ -55,16 +55,16 @@
+         </dependency>
+ 
+         <!-- Config Server Client -->
+-        <!--dependency>
++        <dependency>
+             <groupId>org.springframework.cloud</groupId>
+             <artifactId>spring-cloud-starter-config</artifactId>
+-        </dependency-->
++        </dependency>
+ 
+         <!-- Eureka Client -->
+-        <!-- dependency>
++        <dependency>
+             <groupId>org.springframework.cloud</groupId>
+             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+-        </dependency-->
++        </dependency>
+ 
+         <!-- Kafka Client -->
+         <!--dependency>
+diff --git a/api-delivery-service-v1/src/main/resources/application-dev.yml b/api-delivery-service-v1/src/main/resources/application-dev.yml
+new file mode 100644
+index 0000000..58eafd2
+--- /dev/null
++++ b/api-delivery-service-v1/src/main/resources/application-dev.yml
+@@ -0,0 +1,11 @@
++spring:
++  config:
++    import: "optional:configserver:http://localhost:8888"  # o sin 'optional:' si quieres que falle si no hay server
++
++
++eureka:
++  client:
++    service-url:
++      defaultZone: http://localhost:8761/eureka/
++    register-with-eureka: true
++    fetch-registry: true
+\ No newline at end of file
+diff --git a/api-delivery-service-v1/src/main/resources/application.yml b/api-delivery-service-v1/src/main/resources/application.yml
+index 4e5990e..a538d5c 100644
+--- a/api-delivery-service-v1/src/main/resources/application.yml
++++ b/api-delivery-service-v1/src/main/resources/application.yml
+@@ -1,21 +1,21 @@
+-server:
+-  port: 50060
+-  servlet:
+-    context-path: /api/v1
++#server:
++#  port: 50060
++#  servlet:
++#    context-path: /api/v1
+ 
+ spring:
+   application:
+     name: api-delivery-service-v1
+-  datasource:
+-    url: jdbc:postgresql://localhost:51060/deliverydb
+-    username: deliveryuser
+-    password: deliverypass
+-    driver-class-name: org.postgresql.Driver
+-  jpa:
+-    hibernate:
+-      ddl-auto: update
+-    show-sql: true
+-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+-    properties:
+-      hibernate:
+-        format_sql: true
+\ No newline at end of file
++#  datasource:
++#    url: jdbc:postgresql://localhost:51060/deliverydb
++#    username: deliveryuser
++#    password: deliverypass
++#    driver-class-name: org.postgresql.Driver
++#  jpa:
++#    hibernate:
++#      ddl-auto: update
++#    show-sql: true
++#    database-platform: org.hibernate.dialect.PostgreSQLDialect
++#    properties:
++#      hibernate:
++#        format_sql: true
+\ No newline at end of file
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/DeliveryServiceV1RestClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/DeliveryServiceV1RestClient.java
+new file mode 100644
+index 0000000..9729253
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/DeliveryServiceV1RestClient.java
+@@ -0,0 +1,65 @@
++package com.mitocode.orchestrator.client.delivery.restclient;
++
++import com.mitocode.orchestrator.client.delivery.restclient.dto.AssignDriverRequest;
++import com.mitocode.orchestrator.client.delivery.restclient.dto.DeliveryAddressRequest;
++import com.mitocode.orchestrator.client.delivery.restclient.dto.DeliveryPersonRequest;
++import com.mitocode.orchestrator.client.delivery.restclient.dto.DeliveryResponse;
++import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
++import lombok.AllArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.http.ResponseEntity;
++import org.springframework.stereotype.Component;
++import org.springframework.web.client.RestClient;
++
++import java.util.UUID;
++
++@Slf4j
++@Component
++@AllArgsConstructor
++public class DeliveryServiceV1RestClient {
++
++    private final RestClient deliveryRestClient;
++
++    public DeliveryResponse assignDriver(UUID orderId, CreateOrderOrchestratorRequest createOrderRequest) {
++        AssignDriverRequest assignDriverRequest = new AssignDriverRequest(
++                orderId,
++                new DeliveryAddressRequest(
++                        createOrderRequest.deliveryAddress().address(),
++                        createOrderRequest.deliveryAddress().latitude(),
++                        createOrderRequest.deliveryAddress().longitude(),
++                        createOrderRequest.deliveryAddress().reference()
++                ),
++                new DeliveryPersonRequest(
++                        createOrderRequest.deliveryPerson().id()
++                )
++        );
++
++        return deliveryRestClient.post()
++                .uri("/assign-driver")
++                .body(assignDriverRequest)
++                .retrieve()
++                .body(DeliveryResponse.class);
++    }
++
++    public ResponseEntity<Void> releaseDriver(UUID orderId) {
++        return deliveryRestClient.post()
++                .uri("/{orderId}/release-driver", orderId)
++                .retrieve()
++                .toBodilessEntity();
++    }
++
++    public void startDelivery(UUID orderId) {
++        deliveryRestClient.post()
++                .uri("/{orderId}/start", orderId)
++                .retrieve()
++                .toBodilessEntity();
++    }
++
++    public void completeDelivery(UUID orderId) {
++        deliveryRestClient.post()
++                .uri("/{orderId}/complete", orderId)
++                .retrieve()
++                .toBodilessEntity();
++    }
++
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/config/DeliveryRestClientConfig.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/config/DeliveryRestClientConfig.java
+new file mode 100644
+index 0000000..7cff690
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/config/DeliveryRestClientConfig.java
+@@ -0,0 +1,21 @@
++package com.mitocode.orchestrator.client.delivery.restclient.config;
++
++import org.springframework.beans.factory.annotation.Qualifier;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.web.client.RestClient;
++
++@Configuration
++public class DeliveryRestClientConfig {
++
++    @Bean
++    public RestClient deliveryRestClient(
++            @Value("${http-clients.internal.api-delivery-service-v1.base-url}")
++            String baseUrl,
++            @Qualifier("loadBalancedRestClientBuilder") //Indicamos que use el cliente con LoadBalancer para resuelva por los nombres de servicio de eureka
++            RestClient.Builder restClientBuilder) {
++        return restClientBuilder.clone().baseUrl(baseUrl).build();
++    }
++
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/AssignDriverRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/AssignDriverRequest.java
+new file mode 100644
+index 0000000..0e05c80
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/AssignDriverRequest.java
+@@ -0,0 +1,10 @@
++package com.mitocode.orchestrator.client.delivery.restclient.dto;
++
++import java.util.UUID;
++
++public record AssignDriverRequest(
++        UUID orderId,
++        DeliveryAddressRequest deliveryAddress,
++        DeliveryPersonRequest deliveryPerson
++) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryAddressRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryAddressRequest.java
+new file mode 100644
+index 0000000..720104b
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryAddressRequest.java
+@@ -0,0 +1,9 @@
++package com.mitocode.orchestrator.client.delivery.restclient.dto;
++
++public record DeliveryAddressRequest(
++        String address,
++        Double latitude,
++        Double longitude,
++        String reference
++) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryPersonRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryPersonRequest.java
+new file mode 100644
+index 0000000..0b76233
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryPersonRequest.java
+@@ -0,0 +1,4 @@
++package com.mitocode.orchestrator.client.delivery.restclient.dto;
++
++public record DeliveryPersonRequest(Long id) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryResponse.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryResponse.java
+new file mode 100644
+index 0000000..1b4b74a
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/delivery/restclient/dto/DeliveryResponse.java
+@@ -0,0 +1,12 @@
++package com.mitocode.orchestrator.client.delivery.restclient.dto;
++
++import java.util.UUID;
++
++public record DeliveryResponse(
++        Long id,
++        UUID orderId,
++        String address,
++        String status,
++        String deliveryPersonName
++) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/OrderServiceV1Client.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/OrderServiceV1Client.java
+index ca6785f..e2488b7 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/OrderServiceV1Client.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/OrderServiceV1Client.java
+@@ -6,5 +6,7 @@ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
+ public interface OrderServiceV1Client {
+ 
+     CreateOrderResponse createOrder(CreateOrderOrchestratorRequest createOrderOrchestratorRequest);
++    void cancelOrder(String orderId, String reason);
+ 
++    void updateOrderStatus(String orderId, String status);
+ }
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/httpexchange/OrderServiceV1HttpExchange.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/httpexchange/OrderServiceV1HttpExchange.java
+index b6b7c5c..4abb296 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/httpexchange/OrderServiceV1HttpExchange.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/httpexchange/OrderServiceV1HttpExchange.java
+@@ -38,4 +38,14 @@ public class OrderServiceV1HttpExchange implements OrderServiceV1Client {
+         return orderClient.create(request);
+ 
+     }
++
++    @Override
++    public void cancelOrder(String orderId, String reason) {
++
++    }
++
++    @Override
++    public void updateOrderStatus(String orderId, String status) {
++
++    }
+ }
+\ No newline at end of file
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java
+index af5f844..68c8382 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java
+@@ -1,10 +1,7 @@
+ package com.mitocode.orchestrator.client.ordes.restclient;
+ 
+ import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
+-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderRequest;
+-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
+-import com.mitocode.orchestrator.client.ordes.restclient.dto.CustomerRequest;
+-import com.mitocode.orchestrator.client.ordes.restclient.dto.RestaurantRequest;
++import com.mitocode.orchestrator.client.ordes.restclient.dto.*;
+ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
+ import lombok.AllArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+@@ -35,4 +32,23 @@ public class OrderServiceV1RestClient implements OrderServiceV1Client {
+                 .body(CreateOrderResponse.class);
+ 
+     }
++
++    public void cancelOrder(String orderId, String reason) {
++        log.info("RestClient - Cancelling order: {} for reason: {}", orderId, reason);
++        orderRestClient.post()
++                .uri("/{orderId}/cancel", orderId)
++                .body(new CancelOrderRequest(reason))
++                .retrieve()
++                .body(Void.class);
++    }
++
++    public void updateOrderStatus(String orderId, String status) {
++        log.info("RestClient - Updating order status: {} to {}", orderId, status);
++        orderRestClient.put()
++                .uri("/{orderId}/status", orderId)
++                .body(new UpdateOrderStatusRequest(status))
++                .retrieve()
++                .body(Void.class);
++    }
++
+ }
+\ No newline at end of file
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/CancelOrderRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/CancelOrderRequest.java
+new file mode 100644
+index 0000000..f4a5d1b
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/CancelOrderRequest.java
+@@ -0,0 +1,4 @@
++package com.mitocode.orchestrator.client.ordes.restclient.dto;
++
++public record CancelOrderRequest(String reason) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/UpdateOrderStatusRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/UpdateOrderStatusRequest.java
+new file mode 100644
+index 0000000..edc3790
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/UpdateOrderStatusRequest.java
+@@ -0,0 +1,4 @@
++package com.mitocode.orchestrator.client.ordes.restclient.dto;
++
++public record UpdateOrderStatusRequest(String status) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV1RestClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV1RestClient.java
+index 146dc66..786403d 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV1RestClient.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV1RestClient.java
+@@ -16,6 +16,7 @@ public class PaymentServiceV1RestClient {
+     private final RestClient paymentsV1RestClient;
+ 
+     public ResponseEntity<Void> checkBalance(@RequestBody CheckBalanceRequest request){
++        System.out.println("Invocando PaymentServiceV1RestClient.checkBalance con request: " + request);
+         return paymentsV1RestClient.post()
+                 .uri("/check-balance")
+                 .body(request)
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV2RestClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV2RestClient.java
+index ab1db62..4838ef9 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV2RestClient.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/payments/restclient/PaymentServiceV2RestClient.java
+@@ -14,12 +14,13 @@ public class PaymentServiceV2RestClient {
+ 
+     private final RestClient paymentsV2RestClient;
+ 
+-    public ResponseEntity<Void> checkBalance(@RequestBody CheckBalanceRequest request){
+-        return paymentsV2RestClient.post()
+-                .uri("/check-balance")
+-                .body(request)
+-                .retrieve()
+-                .toBodilessEntity();
++   public ResponseEntity<Void> checkBalance(@RequestBody CheckBalanceRequest request){
++            System.out.println("Invocando PaymentServiceV2RestClient.checkBalance con request: " + request);
++            return paymentsV2RestClient.post()
++                    .uri("/check-balance")
++                    .body(request)
++                    .retrieve()
++                    .toBodilessEntity();
+     }
+ 
+     public ResponseEntity<Void> charge(@RequestBody ChargeRequest request){
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/dto/ReleaseOrderRequest.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/dto/ReleaseOrderRequest.java
+new file mode 100644
+index 0000000..a2e80bd
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/dto/ReleaseOrderRequest.java
+@@ -0,0 +1,8 @@
++package com.mitocode.orchestrator.client.restaurants.dto;
++
++import java.util.UUID;
++
++public record ReleaseOrderRequest(
++        UUID orderId
++) {
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/RestaurantServiceV1RestClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/RestaurantServiceV1RestClient.java
+new file mode 100644
+index 0000000..91d325d
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/RestaurantServiceV1RestClient.java
+@@ -0,0 +1,55 @@
++package com.mitocode.orchestrator.client.restaurants.restclient;
++
++import com.mitocode.orchestrator.client.restaurants.dto.OrderItemRequest;
++import com.mitocode.orchestrator.client.restaurants.dto.ReleaseOrderRequest;
++import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderRequest;
++import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderResponse;
++import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
++import lombok.AllArgsConstructor;
++import org.springframework.http.ResponseEntity;
++import org.springframework.stereotype.Component;
++import org.springframework.web.client.RestClient;
++
++import java.util.UUID;
++
++@Component
++@AllArgsConstructor
++public class RestaurantServiceV1RestClient {
++
++    private final RestClient restaurantV1RestClient;
++
++    public ReserveOrderResponse reserverOrder(UUID orderId, CreateOrderOrchestratorRequest orchestratorRequest) {
++
++        ReserveOrderRequest request = new ReserveOrderRequest(
++                orderId,
++                orchestratorRequest.restaurant().id(),
++                orchestratorRequest.customer().id(),
++                orchestratorRequest.items()
++                        .stream()
++                        .map(item -> new OrderItemRequest(
++                                item.product().id(),
++                                item.product().name(),
++                                item.quantity(),
++                                item.description()
++                        ))
++                        .toList()
++        );
++
++        return restaurantV1RestClient.post()
++                .uri("/{restaurantId}/orders/reserve", orchestratorRequest.restaurant().id())
++                //.header("Content-Type", "application/json")
++                .body(request)
++                .retrieve()
++                .body(ReserveOrderResponse.class);
++    }
++
++    public ResponseEntity<Void> releaseOrder(UUID orderId, Long restaurantId) {
++        ReleaseOrderRequest releaseOrderRequest = new ReleaseOrderRequest(orderId);
++
++        return restaurantV1RestClient.post()
++                .uri("/{restaurantId}/orders/release", restaurantId)
++                .body(releaseOrderRequest)
++                .retrieve()
++                .toBodilessEntity();
++    }
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/config/RestaurantRestClientConfig.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/config/RestaurantRestClientConfig.java
+new file mode 100644
+index 0000000..ae857db
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/restclient/config/RestaurantRestClientConfig.java
+@@ -0,0 +1,20 @@
++package com.mitocode.orchestrator.client.restaurants.restclient.config;
++
++import org.springframework.beans.factory.annotation.Qualifier;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.web.client.RestClient;
++
++@Configuration
++public class RestaurantRestClientConfig {
++
++    @Bean
++    public RestClient restaurantV1RestClient(
++            @Value("${http-clients.internal.api-restaurant-service-v1.base-url}")
++            String baseUrl,
++            @Qualifier("loadBalancedRestClientBuilder") //Indicamos que use el cliente con LoadBalancer para resuelva por los nombres de servicio de eureka
++            RestClient.Builder restClientBuilder) {
++        return restClientBuilder.clone().baseUrl(baseUrl).build();
++    }
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/RestaurantServiceV1WebClient.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/RestaurantServiceV1WebClient.java
+similarity index 96%
+rename from api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/RestaurantServiceV1WebClient.java
+rename to api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/RestaurantServiceV1WebClient.java
+index 7399ec3..970fb52 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/RestaurantServiceV1WebClient.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/RestaurantServiceV1WebClient.java
+@@ -1,4 +1,4 @@
+-package com.mitocode.orchestrator.client.restaurants;
++package com.mitocode.orchestrator.client.restaurants.webclient;
+ 
+ import com.mitocode.orchestrator.client.restaurants.dto.OrderItemRequest;
+ import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderRequest;
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/config/WebClientConfig.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/config/WebClientConfig.java
+similarity index 94%
+rename from api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/config/WebClientConfig.java
+rename to api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/config/WebClientConfig.java
+index 63dcba3..434ef1f 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/config/WebClientConfig.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restaurants/webclient/config/WebClientConfig.java
+@@ -1,4 +1,4 @@
+-package com.mitocode.orchestrator.client.restaurants.config;
++package com.mitocode.orchestrator.client.restaurants.webclient.config;
+ 
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/config/OrderRestClientBaseConfig.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restclient/config/RestClientBaseConfig.java
+similarity index 71%
+rename from api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/config/OrderRestClientBaseConfig.java
+rename to api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restclient/config/RestClientBaseConfig.java
+index c4cd8f4..e6566f9 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/config/OrderRestClientBaseConfig.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restclient/config/RestClientBaseConfig.java
+@@ -1,13 +1,14 @@
+-package com.mitocode.orchestrator.client.ordes.config;
++package com.mitocode.orchestrator.client.restclient.config;
+ 
+ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+ import org.springframework.context.annotation.Bean;
+ import org.springframework.context.annotation.Configuration;
+ import org.springframework.context.annotation.Primary;
++import org.springframework.http.client.SimpleClientHttpRequestFactory;
+ import org.springframework.web.client.RestClient;
+ 
+ @Configuration
+-public class OrderRestClientBaseConfig {
++public class RestClientBaseConfig {
+ 
+     //usamos @LoadBalanced para indicar que este RestClient.Builder debe ser configurado para usar load balancing,
+     // lo que permite resolver el nombre del servicio a través de un balanceador de carga (como Ribbon o Spring Cloud LoadBalancer)
+@@ -15,8 +16,11 @@ public class OrderRestClientBaseConfig {
+     // servicio "http://API-ORDER-SERVICE-V1" en lugar de una URL concreta
+     @Bean("loadBalancedRestClientBuilder")//Indicamo que use el cliente con loadBalanced para resuelva por los nombres de servicio de Eureka
+     @LoadBalanced
+-    public RestClient.Builder restClientBuilder() {
+-        return RestClient.builder();
++    public RestClient.Builder loadBalancedRestClientBuilder() {
++        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
++        factory.setConnectTimeout(2000);// Configuramos un timeout de conexión de 2 segundos
++        factory.setReadTimeout(3000); // Cuanto tiempo esperar para recibir una respuesta después de establecer la conexión
++        return RestClient.builder().requestFactory(factory);
+     }
+ 
+     //usamos @Primary para indicar que este es el bean principal a usar cuando se inyecte un RestClient.Builder sin especificar el nombre del bean,
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/controller/OrderOrchestratorController.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/controller/OrderOrchestratorController.java
+index 58876c5..35ab55d 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/controller/OrderOrchestratorController.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/controller/OrderOrchestratorController.java
+@@ -2,14 +2,15 @@ package com.mitocode.orchestrator.controller;
+ 
+ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
+ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
++import com.mitocode.orchestrator.service.DeliveryService;
+ import com.mitocode.orchestrator.service.OrderOrchestratorService;
++import com.mitocode.orchestrator.service.OrderService;
+ import lombok.AllArgsConstructor;
+ import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+-import org.springframework.web.bind.annotation.PostMapping;
+-import org.springframework.web.bind.annotation.RequestBody;
+-import org.springframework.web.bind.annotation.RequestMapping;
+-import org.springframework.web.bind.annotation.RestController;
++import org.springframework.web.bind.annotation.*;
++
++import java.util.UUID;
+ 
+ @RestController
+ @AllArgsConstructor
+@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
+ public class OrderOrchestratorController {
+ 
+     private final OrderOrchestratorService service;
++    private final DeliveryService deliveryService;
++    private final OrderService orderService;
+ 
+     @PostMapping
+     public ResponseEntity<CreateOrderOrchestratorResponse> createOrder(@RequestBody CreateOrderOrchestratorRequest request) {
+@@ -26,4 +29,21 @@ public class OrderOrchestratorController {
+         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
+     }
+ 
++    @PostMapping("/{orderId}/delivery/start")
++    public ResponseEntity<Void> startDelivery(@PathVariable UUID orderId) {
++
++        deliveryService.startDelivery(orderId);
++
++        return ResponseEntity.ok().build();
++    }
++
++    @PostMapping("/{orderId}/delivery/complete")
++    public ResponseEntity<Void> completeDelivery(@PathVariable UUID orderId) {
++
++        deliveryService.completeDelivery(orderId);
++        orderService.completeOrder(orderId.toString());
++
++        return ResponseEntity.ok().build();
++    }
++
+ }
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/exception/GlobalExceptionHandler.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/exception/GlobalExceptionHandler.java
+new file mode 100644
+index 0000000..762fe55
+--- /dev/null
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/exception/GlobalExceptionHandler.java
+@@ -0,0 +1,20 @@
++package com.mitocode.orchestrator.exception;
++
++import org.springframework.http.ResponseEntity;
++import org.springframework.web.bind.annotation.ExceptionHandler;
++import org.springframework.web.bind.annotation.RestController;
++import org.springframework.web.bind.annotation.RestControllerAdvice;
++
++import java.net.SocketTimeoutException;
++
++@RestControllerAdvice
++public class GlobalExceptionHandler {
++
++    @ExceptionHandler(SocketTimeoutException.class)
++    public ResponseEntity<String> handleSocketTimeoutException(SocketTimeoutException e) {
++        return ResponseEntity
++                .status(504)
++                .body("El servicio de pago no respondió a tiempo. Por favor, inténtalo de nuevo más tarde.");
++    }
++
++}
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/DeliveryService.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/DeliveryService.java
+index 61e5f47..6aaa676 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/DeliveryService.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/DeliveryService.java
+@@ -1,4 +1,37 @@
+ package com.mitocode.orchestrator.service;
+ 
++import com.mitocode.orchestrator.client.delivery.restclient.DeliveryServiceV1RestClient;
++import com.mitocode.orchestrator.client.delivery.restclient.dto.DeliveryResponse;
++import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
++import lombok.AllArgsConstructor;
++import lombok.extern.slf4j.Slf4j;
++import org.springframework.http.ResponseEntity;
++import org.springframework.stereotype.Service;
++
++import java.util.UUID;
++
++@Slf4j
++@Service
++@AllArgsConstructor
+ public class DeliveryService {
++
++    private final DeliveryServiceV1RestClient client;
++
++    public DeliveryResponse assignDriver(UUID orderId, CreateOrderOrchestratorRequest createOrderRequest) {
++        log.info("Assigning driver for order ID: {}", orderId);
++        return client.assignDriver(orderId, createOrderRequest);
++    }
++
++    public ResponseEntity<Void> releaseDriver(UUID orderId) {
++        return client.releaseDriver(orderId);
++    }
++
++    public void startDelivery(UUID orderId) {
++        client.startDelivery(orderId);
++    }
++
++    public void completeDelivery(UUID orderId) {
++        client.completeDelivery(orderId);
++    }
++
+ }
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderOrchestratorService.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderOrchestratorService.java
+index d8ee168..22bfb0d 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderOrchestratorService.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderOrchestratorService.java
+@@ -6,6 +6,8 @@ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
+ import lombok.AllArgsConstructor;
+ import org.springframework.stereotype.Service;
+ 
++import java.util.UUID;
++
+ @Service
+ @AllArgsConstructor
+ public class OrderOrchestratorService {
+@@ -13,7 +15,7 @@ public class OrderOrchestratorService {
+     private final OrderService orderService;
+     private final PaymentService paymentService;
+     private final RestaurantService restaurantService;
+-    /*private final DeliveryService deliveryService;*/
++    private final DeliveryService deliveryService;
+ 
+     public CreateOrderOrchestratorResponse createOrder(CreateOrderOrchestratorRequest request) {
+ 
+@@ -22,8 +24,17 @@ public class OrderOrchestratorService {
+         paymentService.checkBalance(request.customer().id(), request.card().id(), request.total());
+         paymentService.charge(request.customer().id(), request.card().id(), request.total());
+         restaurantService.reserveRestaurant(orderCreated.id(), request);
++        deliveryService.assignDriver(orderCreated.id(), request);
+ 
+         return new CreateOrderOrchestratorResponse(orderCreated.id());
+     }
+ 
++    public void startDelivery(UUID orderId) {
++        deliveryService.startDelivery(orderId);
++    }
++
++    public void completeDelivery(UUID orderId) {
++        deliveryService.completeDelivery(orderId);
++    }
++
+ }
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderService.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderService.java
+index 319e6f6..cad47f9 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderService.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/OrderService.java
+@@ -19,4 +19,9 @@ public class OrderService {
+         return orderServiceV1Client.createOrder(orchestratorRequest);
+     }
+ 
++    public void completeOrder(String orderId) {
++        log.info("Completing order through Order Service V1 Client");
++        orderServiceV1Client.updateOrderStatus(orderId, "COMPLETED");
++    }
++
+ }
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/PaymentService.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/PaymentService.java
+index d1e651c..0d56e6f 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/PaymentService.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/PaymentService.java
+@@ -27,7 +27,8 @@ public class PaymentService {
+         log.info("Checking balance for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
+ 
+         CheckBalanceRequest request = new CheckBalanceRequest(customerId, cardId, amount);
+-        ResponseEntity<Void> response = paymentServiceClient.checkBalance(request);
++        //ResponseEntity<Void> response = paymentServiceClient.checkBalance(request);
++        ResponseEntity<Void> response = paymentServiceV2RestClient.checkBalance(request);
+ 
+         if (response.getStatusCode().is4xxClientError()) {
+             throw new RuntimeException("Insufficient funds for customerId: " + customerId + ", cardId: " + cardId);
+@@ -47,12 +48,16 @@ public class PaymentService {
+         if (response.getStatusCode().isError()){
+             throw new RuntimeException("Error charging amount to customerId: " + customerId + ", cardId: " + cardId);
+         }
++
++        log.info("Successfully charged amount for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
+     }
+ 
+     //realizar el cargo
++    //El fallback method tiene que tener la misma firma del metodo anotado con @CircuitBreaker + un parametro adicional de tipo Throwable
+     public void chargeFallback(Long customerId, Long cardId, BigDecimal amount,Throwable ex) {
+         log.info("Calling Fallback PaymentServiceV1#charge");
+         // Simula un insert a la base de datos
++        //validacion si ya se hizo el insert del metodo de arriba no hacer nada
+         ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
+         ResponseEntity<Void> response = paymentServiceV1RestClient.charge(request);
+ 
+diff --git a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/RestaurantService.java b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/RestaurantService.java
+index 7adabb6..9bafb3b 100644
+--- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/RestaurantService.java
++++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/service/RestaurantService.java
+@@ -1,6 +1,6 @@
+ package com.mitocode.orchestrator.service;
+ 
+-import com.mitocode.orchestrator.client.restaurants.RestaurantServiceV1WebClient;
++import com.mitocode.orchestrator.client.restaurants.webclient.RestaurantServiceV1WebClient;
+ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
+ import lombok.AllArgsConstructor;
+ import lombok.extern.slf4j.Slf4j;
+diff --git a/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosConfig.java b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosConfig.java
+new file mode 100644
+index 0000000..ba7d949
+--- /dev/null
++++ b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosConfig.java
+@@ -0,0 +1,12 @@
++package com.mitocode.payment.chaos;
++
++public record ChaosConfig(
++        boolean enabled,
++        ChaosType type,
++        int delayMs,
++        int failTimes
++) {
++    public static ChaosConfig disabled() {
++        return new ChaosConfig(false, ChaosType.NONE, 0, 0);
++    }
++}
+\ No newline at end of file
+diff --git a/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosState.java b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosState.java
+new file mode 100644
+index 0000000..96e8e38
+--- /dev/null
++++ b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosState.java
+@@ -0,0 +1,22 @@
++package com.mitocode.payment.chaos;
++
++import lombok.Getter;
++
++import java.util.concurrent.atomic.AtomicInteger;
++
++public class ChaosState {
++
++    @Getter
++    private ChaosConfig config = ChaosConfig.disabled();
++    private final AtomicInteger counter = new AtomicInteger(0);
++
++    public void update(ChaosConfig config) {
++        this.config = config;
++        counter.set(0);
++    }
++
++    public boolean shouldFail() {
++        return counter.incrementAndGet() <= config.failTimes();
++    }
++
++}
+diff --git a/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosType.java b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosType.java
+new file mode 100644
+index 0000000..7429eaf
+--- /dev/null
++++ b/api-payment-service-v2/src/main/java/com/mitocode/payment/chaos/ChaosType.java
+@@ -0,0 +1,8 @@
++package com.mitocode.payment.chaos;
++
++public enum ChaosType {
++    NONE,
++    DELAY,
++    ERROR,
++    ERROR_N_TIMES
++}
+\ No newline at end of file
+diff --git a/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/PaymentController.java b/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/PaymentController.java
+index 7b175b7..6c08274 100644
+--- a/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/PaymentController.java
++++ b/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/PaymentController.java
+@@ -1,9 +1,13 @@
+ package com.mitocode.payment.controller;
+ 
++import com.mitocode.payment.chaos.ChaosConfig;
++import com.mitocode.payment.chaos.ChaosType;
++import com.mitocode.payment.chaos.ChaosState;
+ import com.mitocode.payment.domain.Charge;
+ import com.mitocode.payment.dto.ChargeRequest;
+ import com.mitocode.payment.service.PaymentService;
+ import lombok.extern.slf4j.Slf4j;
++import org.springframework.http.ResponseEntity;
+ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RequestMapping;
+@@ -14,15 +18,46 @@ import org.springframework.web.bind.annotation.RestController;
+ @RequestMapping("/payments")
+ public class PaymentController {
+ 
++    private final ChaosState chaosState = new ChaosState();
++
+     private final PaymentService service;
+ 
+     public PaymentController(PaymentService service) {
+         this.service = service;
+     }
+ 
++    @PostMapping("/chaos")
++    public ResponseEntity<Void> configureChaos(@RequestBody ChaosConfig chaosConfig) {
++        chaosState.update(chaosConfig);
++        return ResponseEntity.ok().build();
++    }
++
++    private void applyChaos() throws InterruptedException {
++        ChaosConfig chaos = chaosState.getConfig();
++
++        if (!chaos.enabled() || chaos.type() == ChaosType.NONE) {
++            return;
++        }
++
++        if (chaos.type() == ChaosType.DELAY) {
++            Thread.sleep(chaos.delayMs());
++        }
++
++        if (chaos.type() == ChaosType.ERROR) {
++            throw new RuntimeException("Chaos: forced error");
++        }
++
++        if (chaos.type() == ChaosType.ERROR_N_TIMES && chaosState.shouldFail()) {
++            throw new RuntimeException("Chaos: temporary error");
++        }
++    }
++
+     @PostMapping("/charge")
+-    public void charge(@RequestBody ChargeRequest chargeRequest) {
++    public void charge(@RequestBody ChargeRequest chargeRequest) throws InterruptedException {
+         log.info("Charging amount");
++
++        applyChaos();
++
+         // request -> dominio
+         Charge charge = new Charge(chargeRequest.customerId(), chargeRequest.cardId(), chargeRequest.amount());
+         service.charge(charge);
+diff --git a/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/chaos-documentation.md b/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/chaos-documentation.md
+new file mode 100644
+index 0000000..cd3a0c2
+--- /dev/null
++++ b/api-payment-service-v2/src/main/java/com/mitocode/payment/controller/chaos-documentation.md
+@@ -0,0 +1,53 @@
++# CHAOS Testing Endpoints
++
++## Activa CHAOS: introduce un delay de 5 segundos en todos los endpoints
++
++```
++curl -X POST http://localhost:50030/api/v2/payments/chaos \
++    -H "Content-Type: application/json" \
++    -d '{
++        "enabled": true,
++        "type": "DELAY",
++        "delayMs": 5000,
++        "failTimes": 0
++    }'
++```
++
++## Activa CHAOS: todos los requests fallan inmediatamente con error 500
++
++```
++curl -X POST http://localhost:50030/api/v2/payments/chaos \
++    -H "Content-Type: application/json" \
++    -d '{
++        "enabled": true,
++        "type": "ERROR",
++        "delayMs": 0,
++        "failTimes": 0
++    }'
++```
++
++## Activa CHAOS: los próximos 3 requests fallan, luego el servicio se recupera
++
++```
++curl -X POST http://localhost:50030/api/v2/payments/chaos \
++    -H "Content-Type: application/json" \
++    -d '{
++        "enabled": true,
++        "type": "ERROR_N_TIMES",
++        "delayMs": 0,
++        "failTimes": 3
++    }'
++```
++
++## Desactiva CHAOS: el servicio vuelve a comportamiento normal
++
++```
++curl -X POST http://localhost:50030/api/v2/payments/chaos \
++    -H "Content-Type: application/json" \
++    -d '{
++        "enabled": false,
++        "type": "NONE",
++        "delayMs": 0,
++        "failTimes": 0
++    }'
++```
+\ No newline at end of file
+diff --git a/infra/config-server-properties/api-delivery-service-v1-dev.yml b/infra/config-server-properties/api-delivery-service-v1-dev.yml
+new file mode 100644
+index 0000000..96bc429
+--- /dev/null
++++ b/infra/config-server-properties/api-delivery-service-v1-dev.yml
+@@ -0,0 +1,19 @@
++server:
++  port: 50060
++  servlet:
++    context-path: /api/v1
++
++spring:
++  datasource:
++    url: jdbc:postgresql://localhost:51060/deliverydb
++    username: deliveryuser
++    password: deliverypass
++    driver-class-name: org.postgresql.Driver
++  jpa:
++    hibernate:
++      ddl-auto: update
++    show-sql: true
++    database-platform: org.hibernate.dialect.PostgreSQLDialect
++    properties:
++      hibernate:
++        format_sql: true
+\ No newline at end of file

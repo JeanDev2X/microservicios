@@ -47,6 +47,8 @@ public class PaymentService {
         if (response.getStatusCode().isError()){
             throw new RuntimeException("Error charging amount to customerId: " + customerId + ", cardId: " + cardId);
         }
+
+        log.info("Successfully charged amount for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
     }
 
     //realizar el cargo
@@ -59,6 +61,7 @@ public class PaymentService {
         if (response.getStatusCode().isError()){
             throw new RuntimeException("Error charging amount to customerId: " + customerId + ", cardId: " + cardId);
         }
+        log.info("Successfully charged amount for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
     }
 
 }
