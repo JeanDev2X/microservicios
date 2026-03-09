@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.restaurants;
+package com.mitocode.orchestrator.client.restaurants.restclient;
 
 import com.mitocode.orchestrator.client.restaurants.dto.OrderItemRequest;
 import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderRequest;
@@ -6,21 +6,17 @@ import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 import java.util.UUID;
 
-import static reactor.netty.http.HttpConnectionLiveness.log;
-
 @Component
 @AllArgsConstructor
-public class RestaurantServiceV1WebClient {
+public class RestaurantServiceV1RestClient {
 
-    private final WebClient restaurantWebClient;
+    private final RestClient restaurantV1RestClient;
 
     public ReserveOrderResponse reserverOrder(UUID orderId, CreateOrderOrchestratorRequest orchestratorRequest) {
-
-        log.info("WebClient - Reserving order at restaurant: {}", orchestratorRequest.restaurant().name());
 
         ReserveOrderRequest request = new ReserveOrderRequest(
                 orderId,
@@ -37,11 +33,11 @@ public class RestaurantServiceV1WebClient {
                         .toList()
         );
 
-        return restaurantWebClient.post()
+        return restaurantV1RestClient.post()
                 .uri("/{restaurantId}/orders/reserve", orchestratorRequest.restaurant().id())
-                .bodyValue(request)
+                //.header("Content-Type", "application/json")
+                .body(request)
                 .retrieve()
-                .bodyToMono(ReserveOrderResponse.class)
-                .block();
+                .body(ReserveOrderResponse.class);
     }
 }
