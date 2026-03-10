@@ -36,8 +36,9 @@ public class PaymentService {
         log.info("Sufficient funds available for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
     }
 
-    //realizar el cargo
-    @CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
+    //realizar el cargo.
+    //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
+    //@CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
     public void charge(Long customerId, Long cardId, BigDecimal amount) {
         log.info("Calling PaymentServiceV2#charge");
         // Simula un insert a la base de datos
