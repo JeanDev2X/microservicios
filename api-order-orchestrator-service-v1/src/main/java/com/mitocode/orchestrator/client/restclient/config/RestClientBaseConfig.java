@@ -14,7 +14,7 @@ public class RestClientBaseConfig {
     @Bean("loadBalancedRestClientBuilder")
     @LoadBalanced
     public RestClient.Builder loadBalancedRestClientBuilder() {
-
+        System.out.println("tiempo de espera para conectarse al servidor: 2000ms, tiempo de espera para recibir respuesta del servidor: 3000ms");
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(2000); //Cuánto tiempo espero para “conectarme” al servidor.
         factory.setReadTimeout(3000); //Cuánto tiempo espero a que el servidor me responda después de conectarme.
