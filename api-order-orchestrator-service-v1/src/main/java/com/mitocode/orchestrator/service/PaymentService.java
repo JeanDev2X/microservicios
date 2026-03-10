@@ -38,12 +38,20 @@ public class PaymentService {
 
     //realizar el cargo.
     //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
-    //@CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
+    @CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
     public void charge(Long customerId, Long cardId, BigDecimal amount) {
         log.info("Calling PaymentServiceV2#charge");
+
         // Simula un insert a la base de datos
         ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceV2RestClient.charge(request);
+
+//        ResponseEntity<Void> response;
+//        try {
+//            response = paymentServiceV2RestClient.charge(request);
+//        } catch (Exception ex) {
+//            throw new PaymentFailedException("PaymentServiceV2 is not available", ex);
+//        }
 
         if (response.getStatusCode().isError()){
             throw new RuntimeException("Error charging amount to customerId: " + customerId + ", cardId: " + cardId);
