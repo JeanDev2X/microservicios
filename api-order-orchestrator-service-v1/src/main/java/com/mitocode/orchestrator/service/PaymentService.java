@@ -6,6 +6,7 @@ import com.mitocode.orchestrator.client.payments.dto.CheckBalanceRequest;
 import com.mitocode.orchestrator.client.payments.restclient.PaymentServiceV1RestClient;
 import com.mitocode.orchestrator.client.payments.restclient.PaymentServiceV2RestClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +39,10 @@ public class PaymentService {
         log.info("Sufficient funds available for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
     }
 
+    //@RateLimiter(name = "chargeRateLimiter", fallbackMethod = "chargeFallback")
     //realizar el cargo.
-    //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
     //@Retry(name = "defaultRetry", fallbackMethod = "chargeFallback")
+    //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
     @CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
     public void charge(Long customerId, Long cardId, BigDecimal amount) {
         log.info("Calling PaymentServiceV2#charge");

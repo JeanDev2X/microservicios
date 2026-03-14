@@ -32,3 +32,9 @@ resilience4j:
         #ignore-exceptions:
         #  - java.lang.IllegalArgumentException # Se ignoran, no se reintenta
         #  - com.mitocode.orchestrator.exception.ServiceTimeOutException
+  ratelimiter:
+    instances:
+      chargeRateLimiter: # Nombre que nosotros definimos
+        limit-for-period: 2       # máximo de llamadas permitidas
+        limit-refresh-period: 10s # cada cuánto se reinicia el contador
+        timeout-duration: 4s  #las llamadas excendentes esperan por un slot libre durante 1s segundos sino se llama al fallback
