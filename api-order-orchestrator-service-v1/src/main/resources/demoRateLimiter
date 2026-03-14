@@ -1,0 +1,44 @@
+seq 1 10 | xargs -n1 -P10 curl --location 'http://localhost:50100/api/v1/order-orchestrator/orders' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc2NzgyNDI4OCwiZXhwIjoxNzY3ODI3ODg4LCJyb2xlcyI6WyJST0xFX0FETUlOIl19.keRdh6ilDF0zAjEzXII1r8DxUfeaHacr-vsRyMc-7FQ' \
+--data '{
+    "customer": {
+        "id": 9996,
+        "name": "Andres Gonzales"
+    },
+    "restaurant": {
+        "id": 1000,
+        "name": "Burger Big Boy"
+    },
+    "card": {
+        "id": 6565
+    },
+    "items": [
+        {
+            "product": {
+                "id": 956,
+                "name": "Pizza Pepperoni"
+            },
+            "quantity": 2,
+            "description": "Extra queso"
+        },
+        {
+            "product": {
+                "id": 985,
+                "name": "Coca Cola"
+            },
+            "quantity": 1,
+            "description": "Sin hielo"
+        }
+    ],
+    "deliveryAddress": {
+        "address": "Calle Los Angeles 706, Departamento 125",
+        "latitude": 9636666,
+        "longitude": 698897,
+        "reference": "Al frente del parque de las leyendas puerta 5"
+    },
+    "deliveryPerson": {
+        "id": 1000007
+    },
+    "total": 180.13
+}' -w "\n"
