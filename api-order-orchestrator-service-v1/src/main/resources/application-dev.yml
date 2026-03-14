@@ -20,3 +20,15 @@ resilience4j:
         waitDurationInOpenState: 10s         # Tiempo que el circuito permanece abierto antes de pasar a HALF-OPEN para probar si el servicio ya se recuperó
         permittedNumberOfCallsInHalfOpenState: 3   # Cantidad de llamadas permitidas cuando está en HALF-OPEN para evaluar si el servicio funciona de nuevo
         minimumNumberOfCalls: 5             # Mínimo de llamadas necesarias antes de evaluar si debe abrirse el circuito (para evitar decisiones con pocos datos)
+  retry:
+    instances:
+      defaultRetry: # Nombre que nosotros definimos
+        max-attempts: 10          # Número máximo de intentos
+        wait-duration: 1s        # Tiempo de espera entre intentos, despues de que termina la ejecución fallida
+        #retry-exceptions:
+        #  - com.mitocode.orchestrator.exception.ServiceUnavailableException  # Tipos de excepciones que van a disparar el retry
+        #  - feign.FeignException
+        #  - feign.RetryableException
+        #ignore-exceptions:
+        #  - java.lang.IllegalArgumentException # Se ignoran, no se reintenta
+        #  - com.mitocode.orchestrator.exception.ServiceTimeOutException

@@ -6,9 +6,11 @@ import com.mitocode.orchestrator.client.payments.dto.CheckBalanceRequest;
 import com.mitocode.orchestrator.client.payments.restclient.PaymentServiceV1RestClient;
 import com.mitocode.orchestrator.client.payments.restclient.PaymentServiceV2RestClient;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,6 +40,7 @@ public class PaymentService {
 
     //realizar el cargo.
     //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
+    //@Retry(name = "defaultRetry", fallbackMethod = "chargeFallback")
     @CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
     public void charge(Long customerId, Long cardId, BigDecimal amount) {
         log.info("Calling PaymentServiceV2#charge");
@@ -45,6 +48,11 @@ public class PaymentService {
         // Simula un insert a la base de datos
         ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceV2RestClient.charge(request);
+
+        //De preferencia propagar las excepciones de tipo 5XX para que CircuitBreaker las capture
+//        if (response.getStatusCode().is5xxServerError()) {
+//            throw new RuntimeException("PaymentServiceV2 is not available");
+//        }
 
 //        ResponseEntity<Void> response;
 //        try {
@@ -60,6 +68,9 @@ public class PaymentService {
         log.info("Successfully charged amount for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
     }
 
+    //El metodo anotado con circuit breaker siempre debe ser publico por AOP
+    //Retry y CircuitBreaker no funcionan juntos por que CircuitBreaker captura primero el error y lo maneja con su fallback, debe funcionar uno por uno
+    //El fallback method tiene que tener la misma firma del metodo anotado con @CircuitBreaker + un parametro adicional de tipo Throwable
     //realizar el cargo
     public void chargeFallback(Long customerId, Long cardId, BigDecimal amount,Throwable ex) {
         log.info("Calling Fallback PaymentServiceV1#charge");
