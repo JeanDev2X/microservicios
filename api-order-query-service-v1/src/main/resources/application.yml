@@ -1,15 +1,17 @@
 spring:
   application:
     name: api-order-query-service-v1
-  mongodb:
-    uri: mongodb://order_read_user:order_read_pass@localhost:51070/order_read
-    database: order_read
+#  mongodb:
+#    uri: mongodb://order_read_user:order_read_pass@localhost:51070/order_read
+#    database: order_read
 
-server:
-  port: 50070
-  servlet:
-    context-path: /api/v1
+#server:
+#  port: 50070
+#  servlet:
+#    context-path: /api/v1
 #
+#en spring boot 3.x.x se cambia la configuracion de mongodb a:
+
 #spring:
 #  data:
 #    mongodb:
