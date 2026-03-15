@@ -1,0 +1,17 @@
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8888"  # o sin 'optional:' si quieres que falle si no hay server
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      #Recibir mensaje como String
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
