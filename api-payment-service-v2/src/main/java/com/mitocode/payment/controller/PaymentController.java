@@ -59,7 +59,11 @@ public class PaymentController {
         applyChaos();
 
         // request -> dominio
-        Charge charge = new Charge(chargeRequest.customerId(), chargeRequest.cardId(), chargeRequest.amount());
-        service.charge(charge);
+        Charge charge = Charge.builder()
+                .cardId(chargeRequest.cardId())
+                .customerId(chargeRequest.customerId())
+                .amount(chargeRequest.amount()).build();
+
+        service.charge(chargeRequest.orderId().toString(), charge);
     }
 }

@@ -20,7 +20,7 @@ public class OrderOrchestratorService {
         CreateOrderResponse orderCreated = orderService.createOrder(request);
 
         paymentService.checkBalance(request.customer().id(), request.card().id(), request.total());
-        paymentService.charge(request.customer().id(), request.card().id(), request.total());
+        paymentService.charge(orderCreated.id(),request.customer().id(), request.card().id(), request.total());
         restaurantService.reserveRestaurant(orderCreated.id(), request);
 
         return new CreateOrderOrchestratorResponse(orderCreated.id());

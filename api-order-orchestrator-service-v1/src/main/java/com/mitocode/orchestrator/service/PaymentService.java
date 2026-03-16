@@ -15,6 +15,7 @@ import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -44,11 +45,11 @@ public class PaymentService {
     //@Retry(name = "defaultRetry", fallbackMethod = "chargeFallback")
     //comenta el @CircuitBreaker para probar el fallback, luego descomenta para volver a la implementación original
     @CircuitBreaker(name = "chargePaymentV2CB", fallbackMethod = "chargeFallback")
-    public void charge(Long customerId, Long cardId, BigDecimal amount) {
+    public void charge(UUID orderId, Long customerId, Long cardId, BigDecimal amount) {
         log.info("Calling PaymentServiceV2#charge");
 
         // Simula un insert a la base de datos
-        ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
+        ChargeRequest request = new ChargeRequest(orderId,customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceV2RestClient.charge(request);
 
         //De preferencia propagar las excepciones de tipo 5XX para que CircuitBreaker las capture
@@ -74,10 +75,10 @@ public class PaymentService {
     //Retry y CircuitBreaker no funcionan juntos por que CircuitBreaker captura primero el error y lo maneja con su fallback, debe funcionar uno por uno
     //El fallback method tiene que tener la misma firma del metodo anotado con @CircuitBreaker + un parametro adicional de tipo Throwable
     //realizar el cargo
-    public void chargeFallback(Long customerId, Long cardId, BigDecimal amount,Throwable ex) {
+    public void chargeFallback(UUID orderId,Long customerId, Long cardId, BigDecimal amount,Throwable ex) {
         log.info("Calling Fallback PaymentServiceV1#charge");
         // Simula un insert a la base de datos
-        ChargeRequest request = new ChargeRequest(customerId, cardId, amount);
+        ChargeRequest request = new ChargeRequest(orderId, customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceV1RestClient.charge(request);
 
         if (response.getStatusCode().isError()){

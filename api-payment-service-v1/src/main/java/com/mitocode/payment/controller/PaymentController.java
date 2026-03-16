@@ -24,8 +24,11 @@ public class PaymentController {
     public void charge(@RequestBody ChargeRequest chargeRequest) {
         log.info("Charging amount");
         // request -> dominio
-        Charge charge = new Charge(chargeRequest.customerId(), chargeRequest.cardId(), chargeRequest.amount());
-        service.charge(charge);
+        Charge charge = Charge.builder()
+                .customerId(chargeRequest.customerId())
+                .cardId(chargeRequest.cardId())
+                .amount(chargeRequest.amount())
+                .build();
+        service.charge(chargeRequest.orderId(), charge);
     }
-
 }
