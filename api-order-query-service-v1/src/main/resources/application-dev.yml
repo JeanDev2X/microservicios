@@ -3,7 +3,7 @@ spring:
     import: "optional:configserver:http://localhost:8888"  # o sin 'optional:' si quieres que falle si no hay server
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9093
     consumer:
       #Recibir mensaje como String
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
