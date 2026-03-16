@@ -18,6 +18,7 @@ public class ChargeRepository {
         entity.setCustomerId(charge.getCustomerId());
         entity.setCardId(charge.getCardId());
         entity.setAmount(charge.getAmount());
+        entity.setStatus(charge.getStatus());
 
         repository.save(entity);
     }

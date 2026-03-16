@@ -18,5 +18,6 @@ public class ChargeEntity {
     private Long cardId;
     private Long customerId;
     private BigDecimal amount;
+    private String status;
 
 }

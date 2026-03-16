@@ -22,4 +22,9 @@ spring:
 #      hibernate:
 #        format_sql: true
 
-## min 60
+  kafka:
+    bootstrap-servers: localhost:9093
+    producer:
+      #Enviar mensaje como String
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
