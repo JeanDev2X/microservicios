@@ -6,10 +6,9 @@ import com.mitocode.orchestrator.service.OrderOrchestratorService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -26,4 +25,19 @@ public class OrderOrchestratorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createOrderResponse);
     }
 
+    @PostMapping("/{orderId}/delivery/start")
+    public ResponseEntity<Void> startDelivery(@PathVariable UUID orderId) {
+
+        service.startDelivery(orderId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{orderId}/delivery/complete")
+    public ResponseEntity<Void> completeDelivery(@PathVariable UUID orderId) {
+
+        service.completeDelivery(orderId);
+
+        return ResponseEntity.ok().build();
+    }
 }

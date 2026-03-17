@@ -6,6 +6,8 @@ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @AllArgsConstructor
 public class OrderOrchestratorService {
@@ -13,17 +15,29 @@ public class OrderOrchestratorService {
     private final OrderService orderService;
     private final PaymentService paymentService;
     private final RestaurantService restaurantService;
-    /*private final DeliveryService deliveryService;*/
+    private final DeliveryService deliveryService;
 
     public CreateOrderOrchestratorResponse createOrder(CreateOrderOrchestratorRequest request) {
 
         CreateOrderResponse orderCreated = orderService.createOrder(request);
 
         paymentService.checkBalance(request.customer().id(), request.card().id(), request.total());
-        paymentService.charge(orderCreated.id(),request.customer().id(), request.card().id(), request.total());
+
+        paymentService.charge(orderCreated.id(), request.customer().id(), request.card().id(), request.total());
+
         restaurantService.reserveRestaurant(orderCreated.id(), request);
 
+        deliveryService.assignDriver(orderCreated.id(), request);
+
         return new CreateOrderOrchestratorResponse(orderCreated.id());
+    }
+
+    public void startDelivery(UUID orderId) {
+        deliveryService.startDelivery(orderId);
+    }
+
+    public void completeDelivery(UUID orderId) {
+        deliveryService.completeDelivery(orderId);
     }
 
 }

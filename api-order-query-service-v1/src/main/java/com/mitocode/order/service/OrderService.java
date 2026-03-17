@@ -3,6 +3,7 @@ package com.mitocode.order.service;
 import com.mitocode.order.controller.dto.*;
 import com.mitocode.order.infraestructure.repository.OrderRepository;
 //import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +84,6 @@ public class OrderService {
                                 .total(document.getTotal())
                                 .build()
                 )
-                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.NOT_FOUND, "Order Not Found"));
+                .orElseThrow(() -> new NotFoundException("Order Not Found"));
     }
 }
