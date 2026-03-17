@@ -13,3 +13,10 @@ public class ApiGatewayV1Application {
 	}
 
 }
+/*
+
+Se va a trabajar con varios perfiles :
+
+spring.profiles.active=case1
+
+ */

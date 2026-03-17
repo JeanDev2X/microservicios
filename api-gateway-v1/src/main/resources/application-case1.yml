@@ -1,0 +1,46 @@
+# Ruteo usando StripPrefix para eliminar secciones de la ruta
+# Es como agregar un context path por cada ruta individual (no globalmente como en server.servlet.context-path)
+
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            #Definir un balanceador si no tuvieramos eureka
+            api-payment-service-v1-without-eureka:
+              - uri: http://localhost:50020
+              - uri: http://localhost:50021
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Esta ruta solo se activa si el header esta presente con ese valor exacto
+            - id: api-payment-service-v1
+              #uri: http://localhost:50020 #Host de api-payment-service-v1 en local
+              #uri: lb://API-PAYMENT-SERVICE-V1 #Host y puerto resuelto por eureka
+              uri: lb://api-payment-service-v1-without-eureka #Host y puerto resuelto por el balanceador definido arriba
+              predicates:
+                - Path=/api/v1/payments/**      # Coincide con cualquier subruta bajo /api/v1/payments/**
+                - Method=POST,GET              # Solo acepta peticiones GET o POST
+                - Header=X-Client-Version, v1  # Solo si el header X-Client-Version tiene el valor "v1"
+              filters:
+                #- AddRequestHeader=X-Demo-Mode, true # Agrega el header X-Demo-Mode con valor "true" a la petición que se reenvía al servicio destino
+                #- AddRequestHeader=X-Request-ID, ${random.uuid} # Agrega un header X-Request-ID con un UUID aleatorio a la petición que se reenvía al servicio destino
+
+            # Ruta para payment V1 (mas especifica, con header)
+            #- id: api-payment-service-v2
+            #  uri: lb://API-PAYMENT-SERVICE-V2 #Host y puerto resuelto por eureka
+            #  predicates:
+            #    - Path=/api/v2/payments/**      # Coincide con cualquier subruta bajo /api/v1/payments/**
+            #    - Method=POST,GET              # Solo acepta peticiones GET o POST
+
+
+
+
+
+logging:
+  level:
+    org.springframework.cloud: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: TRACE
