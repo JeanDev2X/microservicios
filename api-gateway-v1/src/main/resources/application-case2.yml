@@ -1,0 +1,45 @@
+#Se reescribe el path para que el servicio destino reciba lo que espera
+# En este caso el servicio espera /api/v1/payments/** pero el gateway recibe /mitocode/pagos/**
+# Entonces se reescribe la ruta para que el servicio destino reciba lo que espera
+# Si el servicio destino espera /api/v2/payments/** se reescribe a esa ruta
+# Asi el servicio destino no necesita saber que el gateway esta usando /mitocode/pagos/**
+# El cliente llama al gateway con /mitocode/pagos/** y el gateway reescribe la ruta para el servicio destino
+# El cliente no necesita saber que el servicio destino espera /api/v1/payments/** o /api/v2/payments/**
+# El cliente solo necesita saber que debe llamar al gateway con /mitocode/pagos/** y el gateway se encarga del resto
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-payment-service-v2
+              uri: lb://API-PAYMENT-SERVICE-V2  #Host y puerto resuelto por eureka
+              predicates:
+                - Path=/mitocode/pagos/**      # Coincide con cualquier subruta bajo /api/account/v1/
+                - Method=GET,POST              # Solo acepta peticiones GET o POST
+                - Header=X-Client-Version, v2  # Solo si el header X-Client-Version tiene el valor "v2"
+                # Esta ruta solo se activa si el header esta presente con ese valor exacto
+              filters:
+                #Ese regex captura toda la cadena en un grupo nombrado segment
+                - RewritePath=/mitocode/pagos/(?<segment>.*), /api/v2/payments/${segment}
+
+            - id: api-payment-service-v1
+              uri: lb://API-PAYMENT-SERVICE-V1  #Host y puerto resuelto por eureka
+              predicates:
+                - Path=/mitocode/pagos/**      # Coincide con cualquier subruta bajo /api/account/v1/
+                - Method=GET,POST              # Solo acepta peticiones GET o POST
+                - Header=X-Client-Version, v1  # Solo si el header X-Client-Version tiene el valor "v2"
+                # Esta ruta solo se activa si el header esta presente con ese valor exacto
+              filters:
+                - RewritePath=/mitocode/pagos/(?<segment>.*), /api/v1/payments/${segment}
+
+
+
+
+
+logging:
+  level:
+    org.springframework.cloud: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: TRACE
