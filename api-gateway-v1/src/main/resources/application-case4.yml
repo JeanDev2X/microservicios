@@ -1,0 +1,35 @@
+# Ruteo usando StripPrefix para eliminar secciones de la ruta
+# Es como agregar un context path por cada ruta individual (no globalmente como en server.servlet.context-path)
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-payment-service-v1
+              uri: lb://API-PAYMENT-SERVICE-V1
+              predicates:
+                - Path=/mitocode/pagos/**
+                - Method=POST
+              filters:
+                - StripPrefix=2
+                - RewritePath=/(?<segment>.*), /api/v1/payments/${segment}
+                - name: CacheRequestBody     # Necesario para habilitar el reintento en peticiones con cuerpo (POST, PUT, etc.)
+                - name: Retry
+                  args:
+                    retries: 3               # Intentos adicionales (en total serían 1 original + 3 reintentos = 4)
+                    statuses: NOT_FOUND, INTERNAL_SERVER_ERROR # Solo se reintentará si la respuesta es 500
+                    methods: POST            # Se reintenta solo si el método de la solicitud es POST
+                    backoff:                 # Configuración del tiempo de espera entre reintentos
+                      firstBackoff: 1000ms   # 1 segundo antes del primer reintento
+                      maxBackoff: 10s        # Máximo de 10 segundos entre reintentos
+                      factor: 3              # La espera crece exponencialmente (1s, 2s, 4s, ...)
+                      basedOnPreviousValue: false  # Si es false, el backoff se calcula como (firstBackoff * factor^n)
+
+
+logging:
+  level:
+    org.springframework.cloud: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: DEBUG
