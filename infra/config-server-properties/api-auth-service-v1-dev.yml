@@ -1,0 +1,4 @@
+server:
+  port: 50300
+  servlet:
+    context-path: /api/v1/auth
