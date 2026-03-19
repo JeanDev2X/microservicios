@@ -1,0 +1,39 @@
+# Ruteo por JAVA
+
+#  cloud:
+#    gateway:
+#      server:
+#        webflux:
+#          routes:
+#            # Ruta para payment V2 (mas especifica, con header)
+#            - id: api-payment-service-v2
+#              #uri: lb://API-PAYMENT-SERVICE-V2 #Host y puerto resuelto por eureka
+#              #uri: http://localhost:50050 #Host de api-payment-service-v2 en local
+#              uri: http://localhost:50055 #Host de api-payment-service-v2 en prod (con docker compose)
+#              predicates:
+#                - Path=/api/v1/payments/**      # Coincide con cualquier subruta bajo /api/v1/payments/**
+#                #- Method=GET,POST              # Solo acepta peticiones GET o POST
+#                #- Header=X-Client-Version, v2  # Solo si el header X-Client-Version tiene el valor "v2"
+#                # Esta ruta solo se activa si el header esta presente con ese valor exacto
+#              filters:
+#                - AddRequestHeader=X-Demo-Mode, true # Agrega el header X-Demo-Mode con valor "true" a la petición que se reenvía al servicio destino
+#                - AddRequestHeader=X-Request-ID, ${random.uuid} # Agrega un header X-Request-ID con un UUID aleatorio a la petición que se reenvía al servicio destino
+#
+#            - id: api-payment-service-v1
+#              #uri: lb://API-PAYMENT-SERVICE-V1 #Host y puerto resuelto por eureka
+#              #uri: http://localhost:50020 #Host de api-payment-service-v1 en local
+#              uri: http://localhost:50025 #Host de api-payment-service-v1 en prod (con docker compose)
+#              predicates:
+#                - Path=/api/v2/payments/**      # Coincide con cualquier subruta bajo /api/v1/payments/**
+#                #- Method=GET,POST              # Solo acepta peticiones GET o POST
+#                #- Header=X-Client-Version, v1  # Solo si el header X-Client-Version tiene el valor "v1"
+#                # Esta ruta solo se activa si el header esta presente con ese valor exacto
+#              filters:
+#                - AddRequestHeader=X-Demo-Mode, true # Agrega el header X-Demo-Mode con valor "true" a la petición que se reenvía al servicio destino
+#                - AddRequestHeader=X-Request-ID, ${random.uuid} # Agrega un header X-Request-ID con un UUID aleatorio a la petición que se reenvía al servicio destino
+
+#logging:
+#  level:
+#    org.springframework.cloud: DEBUG
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.cloud.gateway.route.RouteDefinitionLocator: DEBUG
