@@ -1,0 +1,35 @@
+# Ruteo usando StripPrefix para eliminar secciones de la ruta
+# Es como agregar un context path por cada ruta individual (no globalmente como en server.servlet.context-path)
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-payment-service-v2
+              uri: lb://API-PAYMENT-SERVICE-V2
+              predicates:
+                - Path=/mitocode/services/**
+                - Method=GET,POST
+                - Header=X-Client-Version, v2
+              filters:
+                - StripPrefix=2
+
+            - id: api-payment-service-v1
+              uri: lb://API-PAYMENT-SERVICE-V1
+              predicates:
+                - Path=/mitocode/services/**
+                - Method=GET,POST
+                - Header=X-Client-Version, v1
+              filters:
+                - StripPrefix=2
+                - RewritePath=/(?<segment>.*), /api/v1/payments/${segment}
+
+            - id: api-order-query-service-v1
+              uri: lb://API-ORDER-QUERY-SERVICE-V1
+              predicates:
+                - Path=/mitocode/search/**
+                - Method=GET
+              filters:
+                - RewritePath=/mitocode/search/(?<segment>.*), /api/v1/orders/${segment}

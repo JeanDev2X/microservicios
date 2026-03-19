@@ -1,0 +1,47 @@
+# Circuit Breaker
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-payment-service-v1
+              uri: lb://API-PAYMENT-SERVICE-V1
+              predicates:
+                - Path=/mitocode/pagos/**
+                - Method=POST
+              filters:
+                - StripPrefix=2
+                - RewritePath=/(?<segment>.*), /api/v1/payments/${segment}
+                - name: CircuitBreaker
+                  args:
+                    name: paymentV1CircuitBreaker
+                    fallbackUri: forward:/fallback
+                    statusCodes:
+                      - INTERNAL_SERVER_ERROR
+                      - NOT_FOUND
+                      - BAD_REQUEST
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      paymentV1CircuitBreaker:
+        # Usa un conteo de llamadas en lugar de una ventana de tiempo
+        slidingWindowType: COUNT_BASED
+        # Evalúa las últimas 10 llamadas
+        slidingWindowSize: 10
+        # No se activa hasta que se hagan al menos 10 llamadas
+        minimumNumberOfCalls: 10
+        # Si 50% o más fallan, el circuito se abre
+        failureRateThreshold: 50
+        # Una vez abierto, espera 10 segundos antes de intentar reabrir
+        waitDurationInOpenState: 10s
+
+
+
+logging:
+  level:
+    org.springframework.cloud: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: DEBUG
