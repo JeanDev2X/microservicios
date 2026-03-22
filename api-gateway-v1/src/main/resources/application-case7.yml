@@ -1,0 +1,35 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-payment-service-v2
+              uri: lb://API-PAYMENT-SERVICE-V2
+              predicates:
+                - Path=/mitocode/services/**
+                - Method=GET,POST
+                - Header=X-Client-Version, v2
+              filters:
+                - StripPrefix=2
+
+            - id: api-payment-service-v1
+              uri: lb://API-PAYMENT-SERVICE-V1
+              predicates:
+                - Path=/mitocode/services/**
+                - Method=GET,POST
+                - Header=X-Client-Version, v1
+              filters:
+                #antes del StripPrefix=2, la ruta completa es /mitocode/services/check-balance, entonces el StripPrefix=2 elimina las dos primeras secciones de la ruta (/mitocode y /services) y deja solo /check-balance
+                - StripPrefix=2
+                #despues del StripPrefix=2 quedaria /check-balance, entonces el RewritePath captura toda la ruta restante y la reescribe a /api/v1/payments/check-balance
+                - RewritePath=/(?<segment>.*), /api/v1/payments/${segment}
+                #despues del RewritePath quedaria /api/v1/payments/check-balance, entonces el servicio destino recibe la ruta que espera
+
+            - id: api-order-query-service-v1
+              uri: lb://API-ORDER-QUERY-SERVICE-V1
+              predicates:
+                - Path=/mitocode/search/**
+                - Method=GET
+              filters:
+                - RewritePath=/mitocode/search/(?<segment>.*), /api/v1/orders/${segment}
