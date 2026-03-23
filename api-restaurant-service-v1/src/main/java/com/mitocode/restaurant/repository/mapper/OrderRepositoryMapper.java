@@ -43,7 +43,7 @@ public class OrderRepositoryMapper {
                 .map(e -> new OrderItem(e.getProductId(), e.getProductName(), e.getQuantity(), e.getDescription()))
                 .toList();
 
-        return new Order(entity.getId(), restaurant, customer, items);
+        return new Order(entity.getId(), restaurant, customer, items, entity.getStatus(), entity.getReason());
     }
 
 }

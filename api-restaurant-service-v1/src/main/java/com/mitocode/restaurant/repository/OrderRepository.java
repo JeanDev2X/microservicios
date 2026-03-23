@@ -6,6 +6,8 @@ import com.mitocode.restaurant.infraestructure.repository.OrderJpaRepository;
 import com.mitocode.restaurant.repository.mapper.OrderRepositoryMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
 public class OrderRepository {
 
@@ -15,6 +17,11 @@ public class OrderRepository {
     public OrderRepository(OrderJpaRepository jpaRepository, OrderRepositoryMapper mapper) {
         this.jpaRepository = jpaRepository;
         this.mapper = mapper;
+    }
+
+    public Order getBy(Long restaurantId, UUID orderId) {
+        OrderEntity entity = jpaRepository.findByRestaurantIdAndId(restaurantId, orderId);
+        return mapper.toDomain(entity);
     }
 
     public Order save(Order order) {

@@ -15,4 +15,6 @@ public class Order {
     private Restaurant restaurant;
     private Customer customer;
     private List<OrderItem> items;
+    private String status;
+    private String reason;
 }

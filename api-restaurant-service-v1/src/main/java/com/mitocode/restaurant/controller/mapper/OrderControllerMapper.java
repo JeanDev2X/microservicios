@@ -20,7 +20,7 @@ public class OrderControllerMapper {
         List<OrderItem> items = request.items().stream()
                 .map(i -> new OrderItem(i.productId(), i.productName(), i.quantity(), i.description()))
                 .toList();
-        return new Order(request.orderId(), restaurant, customer, items);
+        return new Order(request.orderId(), restaurant, customer, items, null, null);
     }
 
     public ReserveOrderResponse toResponse(Order order) {
