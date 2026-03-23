@@ -24,4 +24,6 @@ public class OrderEntity {
 
     private String status;
 
+    private String reason;
+
 }
