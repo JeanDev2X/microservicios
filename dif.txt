@@ -280,14 +280,14 @@ index af5f844..68c8382 100644
 --- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java
 +++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/OrderServiceV1RestClient.java
 @@ -1,10 +1,7 @@
- package com.mitocode.orchestrator.client.ordes.restclient;
+ package com.mitocode.orchestrator.client.orders.restclient;
  
- import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
--import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderRequest;
--import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
--import com.mitocode.orchestrator.client.ordes.restclient.dto.CustomerRequest;
--import com.mitocode.orchestrator.client.ordes.restclient.dto.RestaurantRequest;
-+import com.mitocode.orchestrator.client.ordes.restclient.dto.*;
+ import com.mitocode.orchestrator.client.orders.OrderServiceV1Client;
+-import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderRequest;
+-import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderResponse;
+-import com.mitocode.orchestrator.client.orders.restclient.dto.CustomerRequest;
+-import com.mitocode.orchestrator.client.orders.restclient.dto.RestaurantRequest;
++import com.mitocode.orchestrator.client.orders.restclient.dto.*;
  import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
  import lombok.AllArgsConstructor;
  import lombok.extern.slf4j.Slf4j;
@@ -322,7 +322,7 @@ index 0000000..f4a5d1b
 --- /dev/null
 +++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/CancelOrderRequest.java
 @@ -0,0 +1,4 @@
-+package com.mitocode.orchestrator.client.ordes.restclient.dto;
++package com.mitocode.orchestrator.client.orders.restclient.dto;
 +
 +public record CancelOrderRequest(String reason) {
 +}
@@ -332,7 +332,7 @@ index 0000000..edc3790
 --- /dev/null
 +++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/restclient/dto/UpdateOrderStatusRequest.java
 @@ -0,0 +1,4 @@
-+package com.mitocode.orchestrator.client.ordes.restclient.dto;
++package com.mitocode.orchestrator.client.orders.restclient.dto;
 +
 +public record UpdateOrderStatusRequest(String status) {
 +}
@@ -507,7 +507,7 @@ index c4cd8f4..e6566f9 100644
 --- a/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/ordes/config/OrderRestClientBaseConfig.java
 +++ b/api-order-orchestrator-service-v1/src/main/java/com/mitocode/orchestrator/client/restclient/config/RestClientBaseConfig.java
 @@ -1,13 +1,14 @@
--package com.mitocode.orchestrator.client.ordes.config;
+-package com.mitocode.orchestrator.client.orders.config;
 +package com.mitocode.orchestrator.client.restclient.config;
  
  import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -546,7 +546,7 @@ index 58876c5..35ab55d 100644
  import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
  import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
 +import com.mitocode.orchestrator.service.DeliveryService;
- import com.mitocode.orchestrator.service.OrderOrchestratorService;
+ import com.mitocode.orchestrator.service.OrderOrchestratorServiceWithoutCompensations;
 +import com.mitocode.orchestrator.service.OrderService;
  import lombok.AllArgsConstructor;
  import org.springframework.http.HttpStatus;

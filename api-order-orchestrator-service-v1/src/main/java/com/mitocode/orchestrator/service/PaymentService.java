@@ -27,17 +27,23 @@ public class PaymentService {
     private final PaymentServiceV2RestClient paymentServiceV2RestClient;
 
     //validar si el cliente tiene saldo suficiente
-    public void checkBalance(Long customerId, Long cardId, BigDecimal amount) {
+    public boolean checkBalance(Long customerId, Long cardId, BigDecimal amount) {
         log.info("Checking balance for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
 
         CheckBalanceRequest request = new CheckBalanceRequest(customerId, cardId, amount);
         ResponseEntity<Void> response = paymentServiceClient.checkBalance(request);
 
         if (response.getStatusCode().is4xxClientError()) {
-            throw new RuntimeException("Insufficient funds for customerId: " + customerId + ", cardId: " + cardId);
+            //throw new RuntimeException("Insufficient funds for customerId: " + customerId + ", cardId: " + cardId);
+            return false;
+        }
+
+        if (response.getStatusCode().is5xxServerError()) {
+            throw new RuntimeException("PaymentService is not available");
         }
 
         log.info("Sufficient funds available for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
+        return true;
     }
 
     //@RateLimiter(name = "chargeRateLimiter", fallbackMethod = "chargeFallback")

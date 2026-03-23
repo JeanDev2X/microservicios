@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.ordes.restclient.dto;
+package com.mitocode.orchestrator.client.orders.restclient.dto;
 
 import java.math.BigDecimal;
 

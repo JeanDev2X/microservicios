@@ -1,6 +1,6 @@
-package com.mitocode.orchestrator.client.ordes.httpexchange.config;
+package com.mitocode.orchestrator.client.orders.httpexchange.config;
 
-import com.mitocode.orchestrator.client.ordes.httpexchange.OrderServiceV1HttpExchangeClient;
+import com.mitocode.orchestrator.client.orders.httpexchange.OrderServiceV1HttpExchangeClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

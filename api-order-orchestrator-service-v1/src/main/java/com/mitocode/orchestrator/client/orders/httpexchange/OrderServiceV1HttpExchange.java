@@ -1,19 +1,15 @@
-package com.mitocode.orchestrator.client.ordes.httpexchange;
+package com.mitocode.orchestrator.client.orders.httpexchange;
 
-import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderRequest;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CustomerRequest;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.RestaurantRequest;
+import com.mitocode.orchestrator.client.orders.OrderServiceV1Client;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderRequest;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderResponse;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CustomerRequest;
+import com.mitocode.orchestrator.client.orders.restclient.dto.RestaurantRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
-
-import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Slf4j
 //@Primary
