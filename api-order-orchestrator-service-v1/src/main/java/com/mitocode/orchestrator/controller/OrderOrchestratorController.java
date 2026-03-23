@@ -2,8 +2,9 @@ package com.mitocode.orchestrator.controller;
 
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
+import com.mitocode.orchestrator.service.DeliveryService;
 import com.mitocode.orchestrator.service.OrderOrchestratorService;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,11 +12,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@AllArgsConstructor
 @RequestMapping("/orders")
 public class OrderOrchestratorController {
 
     private final OrderOrchestratorService service;
+    private final DeliveryService deliveryService;
+
+    public OrderOrchestratorController(
+            @Qualifier("orchestratorWithCompensations")
+            OrderOrchestratorService service,
+            DeliveryService deliveryService) {
+        this.service = service;
+        this.deliveryService = deliveryService;
+    }
 
     @PostMapping
     public ResponseEntity<CreateOrderOrchestratorResponse> createOrder(@RequestBody CreateOrderOrchestratorRequest request) {
@@ -28,7 +37,7 @@ public class OrderOrchestratorController {
     @PostMapping("/{orderId}/delivery/start")
     public ResponseEntity<Void> startDelivery(@PathVariable UUID orderId) {
 
-        service.startDelivery(orderId);
+        deliveryService.startDelivery(orderId);
 
         return ResponseEntity.ok().build();
     }
@@ -36,7 +45,7 @@ public class OrderOrchestratorController {
     @PostMapping("/{orderId}/delivery/complete")
     public ResponseEntity<Void> completeDelivery(@PathVariable UUID orderId) {
 
-        service.completeDelivery(orderId);
+        deliveryService.completeDelivery(orderId);
 
         return ResponseEntity.ok().build();
     }

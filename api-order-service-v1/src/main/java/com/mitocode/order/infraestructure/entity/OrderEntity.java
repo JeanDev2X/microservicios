@@ -32,6 +32,6 @@ public class OrderEntity {
     private OrderStatus status;
 
     private BigDecimal total;
-
+    private String cancelReason;
 
 }

@@ -1,6 +1,8 @@
 package com.mitocode.order.service;
 
 import com.mitocode.order.domain.Order;
+import com.mitocode.order.domain.OrderStatus;
+import com.mitocode.order.dto.request.CancelOrderRequest;
 import com.mitocode.order.producer.order.created.OrderCreatedProducer;
 import com.mitocode.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
@@ -25,6 +27,21 @@ public class OrderService {
         orderCreatedProducer.produce(orderSaved);
 
         return orderSaved;
+    }
+
+    public Order cancelOrder(UUID orderId, CancelOrderRequest request) {
+
+        Order domain = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found: " + orderId));
+
+        domain.setStatus(OrderStatus.CANCELLED);
+        domain.setCancelReason(request.reason());
+
+        Order cancelledOrder = orderRepository.save(domain);
+
+        //producer para actualizar el estado y la razon de cancelacion de la orden
+
+        return cancelledOrder;
     }
 
 }

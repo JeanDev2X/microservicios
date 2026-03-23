@@ -15,7 +15,8 @@ public class EntityToDomainMapper {
                 Customer.of(entity.getCustomerId(), entity.getCustomerName()),
                 Restaurant.of(entity.getRestaurantId(), entity.getRestaurantName()),
                 entity.getTotal(),
-                entity.getStatus()
+                entity.getStatus(),
+                entity.getCancelReason()
         );
     }
 }

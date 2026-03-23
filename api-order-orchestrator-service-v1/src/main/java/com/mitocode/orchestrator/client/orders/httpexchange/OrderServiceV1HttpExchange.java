@@ -1,27 +1,29 @@
-package com.mitocode.orchestrator.client.ordes.restclient;
+package com.mitocode.orchestrator.client.orders.httpexchange;
 
-import com.mitocode.orchestrator.client.ordes.OrderServiceV1Client;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderRequest;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CreateOrderResponse;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.CustomerRequest;
-import com.mitocode.orchestrator.client.ordes.restclient.dto.RestaurantRequest;
+import com.mitocode.orchestrator.client.orders.OrderServiceV1Client;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderRequest;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderResponse;
+import com.mitocode.orchestrator.client.orders.restclient.dto.CustomerRequest;
+import com.mitocode.orchestrator.client.orders.restclient.dto.RestaurantRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 @Slf4j
+//@Primary
 @Component
 @AllArgsConstructor
-@Profile("RestClient")
-public class OrderServiceV1RestClient implements OrderServiceV1Client {
+@Profile("HttpExchange")
+public class OrderServiceV1HttpExchange implements OrderServiceV1Client {
 
-    private final RestClient orderRestClient;
+    private final OrderServiceV1HttpExchangeClient orderClient;
 
     public CreateOrderResponse createOrder(CreateOrderOrchestratorRequest createOrderOrchestratorRequest) {
-        log.info("RestClient - Creating order for customer: {}", createOrderOrchestratorRequest.customer().name());
+
+        log.info("HttpExchange - Creating order for customer: {}", createOrderOrchestratorRequest.customer().name());
+
         CreateOrderRequest request = new CreateOrderRequest(
                 new CustomerRequest(createOrderOrchestratorRequest.customer().id(), createOrderOrchestratorRequest.customer().name()),
                 new RestaurantRequest(createOrderOrchestratorRequest.restaurant().id(), createOrderOrchestratorRequest.restaurant().name()),
@@ -29,10 +31,12 @@ public class OrderServiceV1RestClient implements OrderServiceV1Client {
 
         //return orderRestClient.post().uri("/orders") ya no se usa el .uri porque se configura en el bean RestClient desde config server
 
-        return orderRestClient.post()
-                .body(request)
-                .retrieve()
-                .body(CreateOrderResponse.class);
+        return orderClient.create(request);
 
+    }
+
+    @Override
+    public void cancelOrder(String orderId, String reason) {
+        //Not Implemented
     }
 }

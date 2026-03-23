@@ -1,4 +1,4 @@
-package com.mitocode.orchestrator.client.ordes.restclient.config;
+package com.mitocode.orchestrator.client.orders.restclient.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
