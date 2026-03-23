@@ -19,4 +19,9 @@ public class OrderService {
         return orderServiceV1Client.createOrder(orchestratorRequest);
     }
 
+    public void cancelOrder(String orderId, String reason) {
+        log.info("Cancelling order through Order Service V1 Client");
+        orderServiceV1Client.cancelOrder(orderId, reason);
+    }
+
 }

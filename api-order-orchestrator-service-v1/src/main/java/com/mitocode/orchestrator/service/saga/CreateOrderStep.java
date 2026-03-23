@@ -25,6 +25,7 @@ public class CreateOrderStep implements SagaStep {
 
     @Override
     public void compensate(CreateOrderSagaContext context) {
-
+        log.info("Compensating CreateOrderStep: cancelling order {}", context.getOrderId());
+        orderService.cancelOrder(context.getOrderId(), "Order creation failed or rolled back");
     }
 }

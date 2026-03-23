@@ -1,10 +1,7 @@
 package com.mitocode.orchestrator.client.orders.restclient;
 
 import com.mitocode.orchestrator.client.orders.OrderServiceV1Client;
-import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderRequest;
-import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderResponse;
-import com.mitocode.orchestrator.client.orders.restclient.dto.CustomerRequest;
-import com.mitocode.orchestrator.client.orders.restclient.dto.RestaurantRequest;
+import com.mitocode.orchestrator.client.orders.restclient.dto.*;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,4 +32,14 @@ public class OrderServiceV1RestClient implements OrderServiceV1Client {
                 .body(CreateOrderResponse.class);
 
     }
+
+    public void cancelOrder(String orderId, String reason) {
+        log.info("RestClient - Cancelling order: {} for reason: {}", orderId, reason);
+        orderRestClient.post()
+                .uri("/{orderId}/cancel", orderId)
+                .body(new CancelOrderRequest(reason))
+                .retrieve()
+                .body(Void.class);
+    }
+
 }

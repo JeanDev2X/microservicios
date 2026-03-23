@@ -34,4 +34,9 @@ public class OrderServiceV1HttpExchange implements OrderServiceV1Client {
         return orderClient.create(request);
 
     }
+
+    @Override
+    public void cancelOrder(String orderId, String reason) {
+        //Not Implemented
+    }
 }

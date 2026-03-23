@@ -15,10 +15,11 @@ public class Order {
     private Restaurant restaurant;
     private BigDecimal total;
     private OrderStatus status;
+    private String cancelReason;
 
     // Factory for creation
     public static Order createNew(Customer customer, Restaurant restaurant, BigDecimal total) {
-        return new Order(null, customer, restaurant, total, OrderStatus.CREATED);
+        return new Order(null, customer, restaurant, total, OrderStatus.CREATED,null);
     }
 
 }

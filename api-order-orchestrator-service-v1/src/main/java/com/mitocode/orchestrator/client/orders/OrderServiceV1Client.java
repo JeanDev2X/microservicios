@@ -6,5 +6,5 @@ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 public interface OrderServiceV1Client {
 
     CreateOrderResponse createOrder(CreateOrderOrchestratorRequest createOrderOrchestratorRequest);
-
+    void cancelOrder(String orderId, String reason);
 }
