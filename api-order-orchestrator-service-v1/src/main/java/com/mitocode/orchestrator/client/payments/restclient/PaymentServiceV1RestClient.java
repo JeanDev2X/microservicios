@@ -2,6 +2,7 @@ package com.mitocode.orchestrator.client.payments.restclient;
 
 import com.mitocode.orchestrator.client.payments.dto.ChargeRequest;
 import com.mitocode.orchestrator.client.payments.dto.CheckBalanceRequest;
+import com.mitocode.orchestrator.client.payments.dto.RefundRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,15 @@ public class PaymentServiceV1RestClient {
                 .retrieve()
                 .toBodilessEntity();
 
+    }
+
+    public ResponseEntity<Void> refund(@RequestBody RefundRequest request) {
+
+        return paymentsV1RestClient.post()
+                .uri("/refund")
+                .body(request)
+                .retrieve()
+                .toBodilessEntity();
     }
 
 }

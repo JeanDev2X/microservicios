@@ -7,6 +7,7 @@ import com.mitocode.orchestrator.client.delivery.restclient.dto.DeliveryResponse
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -38,6 +39,13 @@ public class DeliveryServiceV1RestClient {
                 .body(assignDriverRequest)
                 .retrieve()
                 .body(DeliveryResponse.class);
+    }
+
+    public ResponseEntity<Void> releaseDriver(UUID orderId) {
+        return deliveryRestClient.post()
+                .uri("/{orderId}/release-driver", orderId)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     public void startDelivery(UUID orderId) {
