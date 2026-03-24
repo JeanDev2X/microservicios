@@ -23,5 +23,5 @@ public class OrderDocument {
     private String deliveryStatus;
     private BigDecimal total;
     private String status;
-
+    private String cancelReason;
 }

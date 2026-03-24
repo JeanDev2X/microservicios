@@ -5,10 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class PaymentDocument {
+public class RefundDocument {
     private CardDocument card;
     private BigDecimal amount;
-    private String status;
-    private String description;
-    private RefundDocument refund;
 }
