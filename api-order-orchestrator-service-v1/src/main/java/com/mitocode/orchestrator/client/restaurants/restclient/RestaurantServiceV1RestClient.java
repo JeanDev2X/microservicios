@@ -1,10 +1,12 @@
 package com.mitocode.orchestrator.client.restaurants.restclient;
 
 import com.mitocode.orchestrator.client.restaurants.dto.OrderItemRequest;
+import com.mitocode.orchestrator.client.restaurants.dto.ReleaseOrderRequest;
 import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderRequest;
 import com.mitocode.orchestrator.client.restaurants.dto.ReserveOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -40,4 +42,15 @@ public class RestaurantServiceV1RestClient {
                 .retrieve()
                 .body(ReserveOrderResponse.class);
     }
+
+    public ResponseEntity<Void> releaseOrder(UUID orderId, Long restaurantId) {
+        ReleaseOrderRequest releaseOrderRequest = new ReleaseOrderRequest(orderId);
+
+        return restaurantV1RestClient.post()
+                .uri("/{restaurantId}/orders/release", restaurantId)
+                .body(releaseOrderRequest)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
 }
