@@ -5,6 +5,7 @@ import com.mitocode.delivery.domain.DeliveryStatus;
 import com.mitocode.delivery.producer.delivery.completed.DeliveryCompletedProducer;
 import com.mitocode.delivery.producer.delivery.started.DeliveryStartedProducer;
 import com.mitocode.delivery.producer.driver.assigned.DriverAssignedProducer;
+import com.mitocode.delivery.producer.driver.released.DriverReleasedProducer;
 import com.mitocode.delivery.repository.DeliveryPersonRepository;
 import com.mitocode.delivery.repository.DeliveryRepository;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class DeliveryService {
     private final DriverAssignedProducer driverAssignedProducer;
     private final DeliveryStartedProducer deliveryStartedProducer;
     private final DeliveryCompletedProducer deliveryCompletedProducer;
+    private final DriverReleasedProducer driverReleasedProducer;
 
     @Transactional
     public Delivery assignDriver(Delivery delivery) {
@@ -35,6 +37,21 @@ public class DeliveryService {
         Delivery saved = deliveryRepository.save(delivery);
         log.info("kafka producer - driver assigned - delivery id");
         driverAssignedProducer.produce(saved);
+
+        return saved;
+        //return deliveryRepository.findByIdWithDeliveryPerson(saved.getId()).orElseThrow(() -> new RuntimeException("Error getting Delivery"));
+    }
+
+    @Transactional
+    public Delivery releaseDriver(UUID orderId) {
+        Delivery delivery = deliveryRepository.getByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+
+        delivery.setStatus(DeliveryStatus.CANCELLED);
+
+        Delivery saved = deliveryRepository.save(delivery);
+
+        driverReleasedProducer.produce(saved);
 
         return saved;
         //return deliveryRepository.findByIdWithDeliveryPerson(saved.getId()).orElseThrow(() -> new RuntimeException("Error getting Delivery"));

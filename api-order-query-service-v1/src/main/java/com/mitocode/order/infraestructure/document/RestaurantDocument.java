@@ -6,4 +6,6 @@ import lombok.Data;
 public class RestaurantDocument {
     private Long id;
     private String name;
+    private String orderStatus;
+    private String reason;
 }
