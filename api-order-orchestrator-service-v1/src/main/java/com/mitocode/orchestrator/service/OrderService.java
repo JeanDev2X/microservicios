@@ -24,4 +24,14 @@ public class OrderService {
         orderServiceV1Client.cancelOrder(orderId, reason);
     }
 
+    public void completeOrder(String orderId) {
+        log.info("Completing order through Order Service V1 Client");
+        orderServiceV1Client.updateOrderStatus(orderId, "COMPLETED");
+    }
+
+    public void updateStatus(String orderId, String status) {
+        log.info("Updating order status through Order Service V1 Client");
+        orderServiceV1Client.updateOrderStatus(orderId, status);
+    }
+
 }

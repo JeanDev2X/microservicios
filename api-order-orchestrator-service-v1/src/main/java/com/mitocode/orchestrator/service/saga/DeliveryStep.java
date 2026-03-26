@@ -24,6 +24,7 @@ public class DeliveryStep implements SagaStep {
 
     @Override
     public void compensate(CreateOrderSagaContext context) {
-
+        log.info("Compensating DeliveryStep: unassigning driver for order {}", context.getOrderId());
+        deliveryService.releaseDriver(UUID.fromString(context.getOrderId()));
     }
 }

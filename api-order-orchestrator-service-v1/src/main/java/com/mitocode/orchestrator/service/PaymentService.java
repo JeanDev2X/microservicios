@@ -1,5 +1,6 @@
 package com.mitocode.orchestrator.service;
 
+import com.mitocode.orchestrator.client.payments.dto.RefundRequest;
 import com.mitocode.orchestrator.client.payments.feign.PaymentServiceV1FeignClient;
 import com.mitocode.orchestrator.client.payments.dto.ChargeRequest;
 import com.mitocode.orchestrator.client.payments.dto.CheckBalanceRequest;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PaymentService {
 
-    private final PaymentServiceV1FeignClient paymentServiceClient;
+    //private final PaymentServiceV1FeignClient paymentServiceClient;
     private final PaymentServiceV1RestClient paymentServiceV1RestClient;
     private final PaymentServiceV2RestClient paymentServiceV2RestClient;
 
@@ -31,7 +32,7 @@ public class PaymentService {
         log.info("Checking balance for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
 
         CheckBalanceRequest request = new CheckBalanceRequest(customerId, cardId, amount);
-        ResponseEntity<Void> response = paymentServiceClient.checkBalance(request);
+        ResponseEntity<Void> response = paymentServiceV1RestClient.checkBalance(request);
 
         if (response.getStatusCode().is4xxClientError()) {
             //throw new RuntimeException("Insufficient funds for customerId: " + customerId + ", cardId: " + cardId);
@@ -91,6 +92,16 @@ public class PaymentService {
             throw new RuntimeException("Error charging amount to customerId: " + customerId + ", cardId: " + cardId);
         }
         log.info("Successfully charged amount for customerId: {}, cardId: {}, amount: {}", customerId, cardId, amount);
+    }
+
+    public void refund(String orderId, Long customerId, Long cardId, BigDecimal amount) {
+        log.info("Refunding amount {} for order id {}", amount, orderId);
+        RefundRequest request = new RefundRequest(orderId, customerId, cardId, amount);
+        ResponseEntity<Void> response = paymentServiceV1RestClient.refund(request);
+
+        if (response.getStatusCode().is2xxSuccessful()){
+            log.info("Refund success");
+        }
     }
 
 }

@@ -5,6 +5,7 @@ import com.mitocode.payment.dto.CheckBalanceRequest;
 import com.mitocode.payment.service.CheckBalanceService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +33,6 @@ public class CheckBalanceController {
         if (service.checkFunds(checkBalance)) {
             return ResponseEntity.ok().build();
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).build();
     }
 }

@@ -19,7 +19,6 @@ public class Order {
 
     // Factory for creation
     public static Order createNew(Customer customer, Restaurant restaurant, BigDecimal total) {
-        return new Order(null, customer, restaurant, total, OrderStatus.CREATED,null);
+        return new Order(null, customer, restaurant, total, OrderStatus.CREATED, null);
     }
-
 }

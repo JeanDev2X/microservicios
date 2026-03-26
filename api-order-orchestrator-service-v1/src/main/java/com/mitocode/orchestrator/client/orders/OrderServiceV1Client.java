@@ -7,4 +7,5 @@ public interface OrderServiceV1Client {
 
     CreateOrderResponse createOrder(CreateOrderOrchestratorRequest createOrderOrchestratorRequest);
     void cancelOrder(String orderId, String reason);
+    void updateOrderStatus(String orderId, String status);
 }
