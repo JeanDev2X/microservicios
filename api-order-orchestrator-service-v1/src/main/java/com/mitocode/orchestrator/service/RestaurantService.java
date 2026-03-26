@@ -4,6 +4,7 @@ import com.mitocode.orchestrator.client.restaurants.restclient.RestaurantService
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -19,5 +20,14 @@ public class RestaurantService {
         log.info("Reserving restaurant for orderId: {}", orderId);
         client.reserverOrder(orderId, createOrderRequest);
     }
+
+    public void releaseReservation(String orderId, Long restaurantId) {
+        ResponseEntity<Void> response = client.releaseOrder(UUID.fromString(orderId), restaurantId);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            log.info("Restaurant Order Released successfully");
+        }
+    }
+
 }
 

@@ -28,6 +28,12 @@ public class PaymentStep implements SagaStep {
 
     @Override
     public void compensate(CreateOrderSagaContext context) {
+        log.info("Compensating PaymentStep: refunding payment for order {}", context.getOrderId());
 
+        paymentService.refund(
+                context.getOrderId(),
+                context.getRequest().customer().id(),
+                context.getRequest().card().id(),
+                context.getRequest().total());
     }
 }

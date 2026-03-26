@@ -4,6 +4,7 @@ import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
 import com.mitocode.orchestrator.service.DeliveryService;
 import com.mitocode.orchestrator.service.OrderOrchestratorService;
+import com.mitocode.orchestrator.service.OrderService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,16 @@ public class OrderOrchestratorController {
 
     private final OrderOrchestratorService service;
     private final DeliveryService deliveryService;
+    private final OrderService orderService;
 
     public OrderOrchestratorController(
             @Qualifier("orchestratorWithCompensations")
             OrderOrchestratorService service,
-            DeliveryService deliveryService) {
+            DeliveryService deliveryService,
+            OrderService orderService) {
         this.service = service;
         this.deliveryService = deliveryService;
+        this.orderService = orderService;
     }
 
     @PostMapping
@@ -46,6 +50,7 @@ public class OrderOrchestratorController {
     public ResponseEntity<Void> completeDelivery(@PathVariable UUID orderId) {
 
         deliveryService.completeDelivery(orderId);
+        orderService.completeOrder(orderId.toString());
 
         return ResponseEntity.ok().build();
     }

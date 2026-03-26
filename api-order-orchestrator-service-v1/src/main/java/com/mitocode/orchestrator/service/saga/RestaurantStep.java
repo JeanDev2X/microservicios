@@ -27,6 +27,10 @@ public class RestaurantStep implements SagaStep {
 
     @Override
     public void compensate(CreateOrderSagaContext context) {
-
+        log.info("Compensating RestaurantStep: cancelling restaurant reservation for order {}", context.getOrderId());
+        restaurantService.releaseReservation(
+                context.getOrderId(),
+                context.getRequest().restaurant().id()
+        );
     }
 }

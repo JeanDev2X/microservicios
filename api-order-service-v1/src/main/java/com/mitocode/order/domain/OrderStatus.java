@@ -3,7 +3,10 @@ package com.mitocode.order.domain;
 public enum OrderStatus {
     CREATED,
     CONFIRMED,
-    SHIPPED,
+    PREPARING,
+    OUT_FOR_DELIVERY,
     DELIVERED,
-    CANCELLED
+    CANCELLED,
+    PENDING_PAYMENT,
+    COMPLETED
 }

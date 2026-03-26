@@ -3,6 +3,7 @@ package com.mitocode.orchestrator.service;
 import com.mitocode.orchestrator.client.orders.restclient.dto.CreateOrderResponse;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorRequest;
 import com.mitocode.orchestrator.controller.dto.CreateOrderOrchestratorResponse;
+import com.mitocode.orchestrator.excepcion.InsufficientFundsException;
 import com.mitocode.orchestrator.excepcion.StopSagaException;
 import com.mitocode.orchestrator.service.saga.CreateOrderSagaContext;
 import com.mitocode.orchestrator.service.saga.SagaStep;
@@ -21,13 +22,13 @@ import java.util.UUID;
 public class OrderOrchestratorServiceWithCompensations implements OrderOrchestratorService{
 
     private final List<SagaStep> steps;
+    private final OrderService orderService;
 
     @Override
     public CreateOrderOrchestratorResponse createOrder(CreateOrderOrchestratorRequest request) {
-
         log.info("Starting order creation with compensations");
+
         CreateOrderSagaContext context = new CreateOrderSagaContext(request);
-        //list to keep track of executed steps for compensation in case of failure
         List<SagaStep> executedSteps = new ArrayList<>();
 
         try {
@@ -35,11 +36,19 @@ public class OrderOrchestratorServiceWithCompensations implements OrderOrchestra
                 step.execute(context);
                 executedSteps.add(step);
             }
+
             log.info("Order creation completed successfully with compensations");
             return new CreateOrderOrchestratorResponse(UUID.fromString(context.getOrderId()));
-        }catch (Exception ex) {
+        } catch (InsufficientFundsException ufe) {
+            //por un error de fondos insuficientes, no se compensa nada porque la orden no se creó, solo se actualiza su estado a PENDING_PAYMENT
+            log.error("Insufficient funds for order {}: {}", context.getOrderId(), ufe.getMessage());
+            if (context.getOrderId() != null) {
+                // Si la orden ya fue creada, actualizar su estado a PENDING_PAYMENT
+                orderService.updateStatus(context.getOrderId(), "PENDING_PAYMENT");
+            }
+            return new CreateOrderOrchestratorResponse(UUID.fromString(context.getOrderId()));
+        } catch (Exception ex) {
 
-            //reverse the list to compensate in the correct order
             Collections.reverse(executedSteps);
 
             for (SagaStep step : executedSteps) {

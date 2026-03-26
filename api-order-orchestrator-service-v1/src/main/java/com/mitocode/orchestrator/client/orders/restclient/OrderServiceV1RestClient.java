@@ -42,4 +42,14 @@ public class OrderServiceV1RestClient implements OrderServiceV1Client {
                 .body(Void.class);
     }
 
+    @Override
+    public void updateOrderStatus(String orderId, String status) {
+        log.info("RestClient - Updating order status: {} to {}", orderId, status);
+        orderRestClient.put()
+                .uri("/{orderId}/status", orderId)
+                .body(new UpdateOrderStatusRequest(status))
+                .retrieve()
+                .body(Void.class);
+    }
+
 }
